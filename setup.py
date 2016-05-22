@@ -7,14 +7,14 @@ setup(
     url='https://github.com/scrapy-plugins/scrapy-streaming',
     description='Develop Spiders using any Programming Language',
     author='Scrapy developers',
-    packages=['streaming'],
+    packages=['scrapy_streaming'],
     requires=['scrapy'],
 
     entry_points={
         'scrapy.commands': [
-            'streaming=streaming.commands.streaming:StreamingCommand',
-            'list=streaming.commands.list:ListCommand',
-            'crawl=streaming.commands.crawl:CrawlCommand'
+            'streaming=scrapy_streaming.commands.streaming:StreamingCommand',
+            'list=scrapy_streaming.commands.list:ListCommand',
+            'crawl=scrapy_streaming.commands.crawl:CrawlCommand'
         ],
     },
 )

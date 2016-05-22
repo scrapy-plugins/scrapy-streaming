@@ -5,6 +5,9 @@ from scrapy.exceptions import UsageError
 
 
 class StreamingCommand(ScrapyCommand):
+    """
+    Command to start stand-alone executables with the the scrapy scrapy_streaming
+    """
 
     requires_project = False
 
