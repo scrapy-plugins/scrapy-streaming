@@ -49,7 +49,7 @@ class ExternalSpiderLoader(object):
                 raise ValueError('External spiders must be defined as json objects.'
                                  ' Read the docs for more information')
 
-            external_spider = ExternalSpider(**spider)
+            external_spider = ExternalSpider.from_dict(spider)
             self._spiders[external_spider.name] = external_spider
         return self._spiders
 
@@ -62,9 +62,10 @@ class ExternalSpiderLoader(object):
 
 def _read_json(path):
     """
-    Parse the json given its path. Returns an empty list if the file doesn't exist.
+    Parse the json given its path. Raises an exception if the file doesn't exist.
     """
     if os.path.isfile(path):
         return json.loads(open(path).read())
-
-    return []
+    else:
+        raise Exception('Could not found "%s" file. Please, check if it\'s in your project root '
+                        'or defined in path defined at EXTERNAL_SPIDERS_PATH setting.' % path)

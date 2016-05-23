@@ -38,4 +38,4 @@ class ExternalSpiderLoaderTest(ProjectTest):
         self.assertRaises(ValueError, ExternalSpiderLoader.from_settings, {})
 
     def test_invalid_file(self):
-        self.assertEqual([], _read_json('/fff'))
+        self.assertRaises(Exception, _read_json, '/home')

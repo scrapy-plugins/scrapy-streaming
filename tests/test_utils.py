@@ -13,4 +13,4 @@ class UtilsTest(ProjectTest):
 
     def test_get_project_default(self):
         os.chdir('../')
-        self.assertEqual(get_project_root(), '.')
+        self.assertRaises(Exception, get_project_root)
