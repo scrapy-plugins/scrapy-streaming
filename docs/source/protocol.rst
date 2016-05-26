@@ -1,3 +1,5 @@
+.. _protocol:
+
 Communication Protocol
 ======================
 
@@ -159,9 +161,9 @@ Read the :class:`~scrapy.spiders.Spider` docs for more information.
 
     {
         "type": "spider",
-        "name": string
-        "start_urls": array
-        *"allowed_domains": array
+        "name": string,
+        "start_urls": array,
+        *"allowed_domains": array,
         *"custom_settings": object
     }
 
