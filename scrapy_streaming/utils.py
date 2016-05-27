@@ -1,7 +1,9 @@
+import json
 import os
 
 from scrapy.utils.conf import closest_scrapy_cfg
 from scrapy.utils.project import inside_project
+from scrapy.utils.python import to_bytes
 
 
 def get_project_root():
@@ -13,3 +15,14 @@ def get_project_root():
     if inside_project():
         return os.path.dirname(closest_scrapy_cfg())
     raise Exception(os.getcwd(), " does not belong to a Scrapy project")
+
+
+def dict_serialize(dict_obj, enc=None):
+    """
+    Serialize a dict object and converts it to bytes
+    """
+    return to_bytes(json.dumps(dict_obj), enc)
+
+
+class WrongMessage(Exception):
+    pass
