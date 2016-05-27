@@ -24,5 +24,9 @@ def dict_serialize(dict_obj, enc=None):
     return to_bytes(json.dumps(dict_obj), enc)
 
 
-class WrongMessage(Exception):
+class MessageError(Exception):
+    pass
+
+
+class RequiredField(object):
     pass

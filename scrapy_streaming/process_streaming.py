@@ -1,5 +1,6 @@
 from scrapy_streaming.communication import CommunicationMap
 from scrapy_streaming.line_receiver import LineProcessProtocol
+from scrapy_streaming.utils import MessageError
 
 
 class ProcessStreamingProtocol(LineProcessProtocol):
@@ -9,14 +10,17 @@ class ProcessStreamingProtocol(LineProcessProtocol):
     """
 
     def connectionMade(self):
-        print('connectionMade')
-        import sys
-        print(sys.version)
         self.writeLine(CommunicationMap.ready())
 
     def lineReceived(self, line):
-        print('lineReceived')
-        print(line)
+        try:
+            msg = CommunicationMap.parse(line)
+            print(msg)
+        except MessageError as e:
+            self.sendError(line, str(e))
+
+    def sendError(self, msg, details):
+        self.writeLine(CommunicationMap.error(msg, details))
 
     def errReceived(self, data):
         print('outReceived')
