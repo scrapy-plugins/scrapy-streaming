@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import tempfile
 from tempfile import mkdtemp
@@ -12,6 +13,8 @@ from scrapy.utils.python import to_native_str
 from scrapy.utils.test import get_testenv
 from shutil import rmtree
 from twisted.trial import unittest
+
+from scrapy_streaming.commands.streaming import _parse_arguments
 
 
 class ProjectTest(unittest.TestCase):
@@ -34,7 +37,7 @@ class ProjectTest(unittest.TestCase):
 [
   {
     "name": "PythonSpider",
-    "command": "scripts/dmoz.py"
+    "command": "spiders/sample1.py"
   },
 
   {
@@ -83,3 +86,53 @@ class ListCommandTest(ProjectTest):
 
         self.assertIn("JavaSpider", out)
         self.assertIn("PythonSpider", out)
+
+
+class StreamingCommandTest(ProjectTest):
+
+    def test_parse_arguments(self):
+        args1 = ['a,b,c']
+        args2 = ['a,b,c', 'c,d']
+
+        self.assertListEqual(_parse_arguments(args1), ['a', 'b', 'c'])
+        self.assertListEqual(_parse_arguments(args2), ['a', 'b', 'c', 'c', 'd'])
+
+    def test_usage_error(self):
+        p = self.proc('streaming')
+        log = to_native_str(p.stdout.read())
+
+        self.assertIn('Usage', log)
+
+    def test_invalid_file(self):
+        p = self.proc('streaming', 'file_not_found.123')
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('File not found: file_not_found.123', log)
+
+    def test_streaming(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        test1 = os.path.join(path, 'spiders', 'sample1.py')
+        p = self.proc('streaming', test1)
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('sample1.py working', log)
+
+
+class CrawlCommandTest(ProjectTest):
+
+    def setUp(self):
+        super(CrawlCommandTest, self).setUp()
+        test_path = os.path.abspath(os.path.dirname(__file__))
+        shutil.copytree(os.path.join(test_path, 'spiders'), os.path.join(self.cwd, 'spiders'))
+
+    def test_crawl_invalid_spider(self):
+        p = self.proc('crawl', 'unknown_spider')
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn("KeyError: 'unknown_spider'", log)
+
+    def test_crawl(self):
+        p = self.proc('crawl', 'PythonSpider')
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('sample1.py working', log)

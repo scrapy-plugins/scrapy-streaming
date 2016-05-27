@@ -1,3 +1,4 @@
+from scrapy.utils.python import to_bytes
 from twisted.internet import protocol
 
 
@@ -37,6 +38,7 @@ class LineProcessProtocol(protocol.ProcessProtocol):
         """
         Write the data to the process stdin, adding the new-line delimiter if necessary
         """
+        data = to_bytes(data)
         if not data.endswith(b'\n'):
             data += self.__delimiter
         self.transport.write(data)

@@ -52,3 +52,18 @@ class SpiderMessage(ExternalSpiderMessageWrapper):
                    'allowed_domains': None, 'custom_settings': None}
 
         super(SpiderMessage, self).__init__(default, fields)
+
+
+class LogMessage(ExternalSpiderMessageWrapper):
+
+    validator = {'message': six.text_type, 'level': six.text_type}
+
+    def __init__(self, fields):
+        default = {'message': RequiredField(), 'level': RequiredField()}
+
+        super(LogMessage, self).__init__(default, fields)
+
+    def log(self):
+        import logging
+        logging.info(self.message)
+        # FIXME add a real logger
