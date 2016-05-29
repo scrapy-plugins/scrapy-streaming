@@ -2,7 +2,7 @@ from scrapy.utils.python import to_bytes
 from twisted.internet import protocol
 
 
-class LineProcessProtocol(protocol.ProcessProtocol):
+class LineProcessProtocol(protocol.ProcessProtocol, object):
     """
     This class extends the twisted ProcessProtocol to split the incoming data in lines.
     The data received by ``outReceived`` if added to an internal buffer, and dispatched by ``lineReceived``

@@ -1,5 +1,6 @@
 import six
 
+from scrapy_streaming.spiders import StreamingSpider
 from scrapy_streaming.utils import MessageError, RequiredField
 
 
@@ -7,6 +8,7 @@ class ExternalSpiderMessageWrapper(object):
     validator = {}
 
     def __init__(self, default, fields):
+        self.data = fields
         self.validate(fields)
         self.update(default, fields)
 
@@ -62,8 +64,3 @@ class LogMessage(ExternalSpiderMessageWrapper):
         default = {'message': RequiredField(), 'level': RequiredField()}
 
         super(LogMessage, self).__init__(default, fields)
-
-    def log(self):
-        import logging
-        logging.info(self.message)
-        # FIXME add a real logger
