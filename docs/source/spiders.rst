@@ -10,7 +10,22 @@ Stand-alone spiders
 
 You can run standalone external spiders using the ``streaming`` command.
 
-.. todo:: document the streaming command
+.. command:: streaming
+
+streaming
+~~~~~~~~~
+
+* Syntax: ``scrapy streaming [options] <path of executable>``
+* Requires project: *no*
+
+and if you need to use extra arguments, add them using the ``-a`` parameter::
+
+    scrapy streaming my_executable -a arg1 -a arg2 -a arg3,arg4
+
+So, to execute a java spider named ``MySpider`` for example, you may use::
+
+    scrapy streaming java -a MySpider
+
 
 Integrate with Scrapy projects
 ------------------------------
@@ -39,4 +54,21 @@ the ``external.json`` as follows:
         "command": "/home/user/my_executable"
       }
     ]
+
+
+You can execute external spiders using the ``crawl`` command.
+
+.. command:: crawl
+
+crawl
+~~~~~
+
+* Syntax: ``scrapy crawl <spider_name>``
+* Requires project: *yes*
+
+This command starts a spider given its name.
+
+Usage examples::
+
+    scrapy crawl java_spider
 
