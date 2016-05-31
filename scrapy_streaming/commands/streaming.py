@@ -28,12 +28,10 @@ class StreamingCommand(ScrapyCommand):
     def run(self, args, opts):
         if len(args) != 1:
             raise UsageError()
-        filename = args[0]
-        if not os.path.exists(filename):
-            raise UsageError("File not found: %s\n" % filename)
+        command = args[0]
 
         arguments = _parse_arguments(opts.args)
-        spider = ExternalSpider('StreamingSpider', filename, arguments)
+        spider = ExternalSpider('StreamingSpider', command, arguments)
         loader = ExternalSpiderLoader.from_settings(self.settings, load_spiders=False)
 
         loader.crawl(spider)

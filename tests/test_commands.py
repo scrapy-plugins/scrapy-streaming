@@ -103,16 +103,18 @@ class StreamingCommandTest(ProjectTest):
 
         self.assertIn('Usage', log)
 
-    def test_invalid_file(self):
-        p = self.proc('streaming', 'file_not_found.123')
-        log = to_native_str(p.stderr.read())
-
-        self.assertIn('File not found: file_not_found.123', log)
-
     def test_streaming(self):
         path = os.path.abspath(os.path.dirname(__file__))
         test1 = os.path.join(path, 'spiders', 'sample1.py')
         p = self.proc('streaming', test1)
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('sample1.py working', log)
+
+    def test_streaming_args(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        test1 = os.path.join(path, 'spiders', 'sample1.py')
+        p = self.proc('streaming', 'python', '-a', test1)
         log = to_native_str(p.stderr.read())
 
         self.assertIn('sample1.py working', log)

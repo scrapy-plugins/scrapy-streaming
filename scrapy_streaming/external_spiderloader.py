@@ -69,7 +69,7 @@ class ExternalSpiderLoader(object):
             name_or_spider = self._spiders[name_or_spider]
 
         protocol = ProcessStreamingProtocol()
-        reactor.spawnProcess(protocol, name_or_spider.command, name_or_spider.args)
+        reactor.spawnProcess(protocol, name_or_spider.command, args=[name_or_spider.command] + name_or_spider.args)
         reactor.run()
 
 
