@@ -1,9 +1,9 @@
-import json
+import simplejson as json
 import os
 
 from scrapy.utils.conf import closest_scrapy_cfg
 from scrapy.utils.project import inside_project
-from scrapy.utils.python import to_bytes
+from scrapy.utils.python import to_bytes, to_unicode
 
 
 def get_project_root():
@@ -24,9 +24,19 @@ def dict_serialize(dict_obj, enc=None):
     return to_bytes(json.dumps(dict_obj), enc)
 
 
+def extract_instance_fields(instance, fields):
+    """
+    Given a list of fields, generate a dict with key being the name of the field
+     mapping to the serialized instance.field value
+    """
+    data = {}
+    for field in fields:
+        value = getattr(instance, field)
+        if isinstance(value, bytes):
+            value = to_unicode(value)
+        data[field] = value
+    return data
+
+
 class MessageError(Exception):
-    pass
-
-
-class RequiredField(object):
     pass

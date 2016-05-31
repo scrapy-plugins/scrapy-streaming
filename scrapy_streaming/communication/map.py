@@ -1,24 +1,28 @@
-import json
+import simplejson as json
 
 from scrapy.utils.python import to_unicode, to_native_str
 
-from scrapy_streaming.communication import wrappers
-from scrapy_streaming.utils import MessageError
+from scrapy_streaming.communication import validators
+from scrapy_streaming.utils import MessageError, extract_instance_fields
 
 
 class CommunicationMap(object):
     """
-    Helper class to create the json messages
+    Helper class to create and receive json messages
     """
 
     mapping = {
-        'spider': wrappers.SpiderMessage,
-        'request': wrappers.RequestMessage,
-        'log': wrappers.LogMessage
+        'spider': validators.SpiderMessage,
+        'request': validators.RequestMessage,
+        'log': validators.LogMessage,
+        'close': validators.CloseMessage
     }
 
     @staticmethod
     def parse(line):
+        """
+        Receives a json string in a line, that will be decoded and parsed to a message
+        """
         try:
             msg = json.loads(to_native_str(line))
 
@@ -48,18 +52,8 @@ class CommunicationMap(object):
         return json.dumps(fields)
 
     @staticmethod
-    def response(resp, request_id='parse'):
-        fields = _extract_fields(resp, ['url', 'headers', 'status', 'body', 'meta', 'flags'])
-        fields['id'] = to_unicode(request_id)
+    def response(resp):
+        fields = extract_instance_fields(resp, ['url', 'headers', 'status', 'body', 'meta', 'flags'])
+        fields['id'] = resp.meta['request_id']
+        fields['type'] = 'response'
         return json.dumps(fields)
-
-
-def _extract_fields(item, fields):
-    """
-    Given a list of fields, generate a dict with key being the name of the field
-     mapping to the serialized item.field value
-    """
-    data = {}
-    for field in fields:
-        data[field] = json.loads(json.dumps(getattr(item, field)))
-    return data
