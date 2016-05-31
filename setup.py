@@ -8,7 +8,7 @@ setup(
     description='Develop Spiders using any Programming Language',
     author='Scrapy developers',
     packages=find_packages(exclude=('tests', 'tests.*')),
-    requires=['scrapy'],
+    requires=['scrapy', 'simplejson'],
 
     entry_points={
         'scrapy.commands': [
