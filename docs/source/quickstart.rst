@@ -202,8 +202,8 @@ found in the scrapy-plugins initial page.
         # if finished all requests, we can close the spider
         if pending_requests == 0:
             # serialize the extracted data and close the spider
-            open('results.txt', 'w').write(json.dumps(result))
-            write_line("{'type': 'close'}")
+            open('results.json', 'w').write(json.dumps(result))
+            write_line('{"type": "close"}')
 
 
 For each response received, we decrease the ``pending_requests`` value, and the we close the spider when there
@@ -286,8 +286,8 @@ The source used in this section:
         # if finished all requests, we can close the spider
         if pending_requests == 0:
             # serialize the extracted data and close the spider
-            open('results.txt', 'w').write(json.dumps(result))
-            write_line("{'type': 'close'}")
+            open('results.json', 'w').write(json.dumps(result))
+            write_line('{"type": "close"}')
 
 
     def main():
