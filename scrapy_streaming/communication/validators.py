@@ -1,3 +1,5 @@
+import logging
+
 import six
 
 from scrapy_streaming.utils import MessageError
@@ -88,6 +90,14 @@ class LogMessage(MessageValidator):
         default = {'message': RequiredField(), 'level': RequiredField()}
 
         super(LogMessage, self).__init__(default, fields)
+        levels = {'CRITICAL': logging.CRITICAL, 'ERROR': logging.ERROR,
+                  'WARNING': logging.WARNING, 'INFO': logging.INFO,
+                  'DEBUG': logging.DEBUG}
+
+        if self.level.upper() not in levels:
+            raise MessageError('Invalid log level: %s' % self.level)
+
+        self.level = levels[self.level.upper()]
 
 
 class CloseMessage(MessageValidator):

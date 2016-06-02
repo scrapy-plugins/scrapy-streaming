@@ -9,21 +9,21 @@ class LineProcessProtocol(protocol.ProcessProtocol, object):
     """
 
     def __init__(self):
-        self.__buffer = b''
-        self.__delimiter = b'\n'
+        self._buffer = b''
+        self._delimiter = b'\n'
 
     def outReceived(self, data):
         """
         Implement the outReceived method, buffering the incoming data and
         dispatching line by line in the ``lineReceived`` method.
         """
-        self.__buffer += data
+        self._buffer += data
 
-        lines = self.__buffer.splitlines()
-        if data.endswith(self.__delimiter):
-            self.__buffer = b''
+        lines = self._buffer.splitlines()
+        if data.endswith(self._delimiter):
+            self._buffer = b''
         else:
-            self.__buffer = lines.pop()
+            self._buffer = lines.pop()
 
         for line in lines:
             self.lineReceived(line)
@@ -40,5 +40,5 @@ class LineProcessProtocol(protocol.ProcessProtocol, object):
         """
         data = to_bytes(data)
         if not data.endswith(b'\n'):
-            data += self.__delimiter
+            data += self._delimiter
         self.transport.write(data)

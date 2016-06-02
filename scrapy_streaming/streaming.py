@@ -1,3 +1,5 @@
+import logging
+
 from scrapy import Request
 from scrapy.crawler import CrawlerRunner
 from twisted.internet import reactor
@@ -16,6 +18,7 @@ class StreamingProtocol(LineProcessProtocol):
 
     def __init__(self):
         super(StreamingProtocol, self).__init__()
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.streaming = Streaming(self)
 
     def connectionMade(self):
@@ -29,6 +32,8 @@ class StreamingProtocol(LineProcessProtocol):
             self.sendError(line, str(e))
 
     def sendError(self, msg, details):
+        self.logger.log(logging.WARNING, msg)
+        self.logger.log(logging.WARNING, details)
         self.writeLine(CommunicationMap.error(msg, details))
 
     def errReceived(self, data):
@@ -51,22 +56,23 @@ class Streaming(object):
     def __init__(self, protocol):
         self.protocol = protocol
         self.crawler = None
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.mapping = {
-            LogMessage: self.on_log,
-            SpiderMessage: self.on_spider,
-            RequestMessage: self.on_request,
-            CloseMessage: self.on_close
+            LogMessage: self._on_log,
+            SpiderMessage: self._on_spider,
+            RequestMessage: self._on_request,
+            CloseMessage: self._on_close
         }
 
     def on_message(self, msg):
+        if not isinstance(msg, LogMessage) and not isinstance(msg, SpiderMessage) and self.crawler is None:
+            raise MessageError('You must start your spider before sending this message')
         self.mapping[type(msg)](msg)
 
-    def on_log(self, msg):
-        import logging
-        logging.info(msg.message)
-        # FIXME add a real logger
+    def _on_log(self, msg):
+        self.logger.log(msg.level, msg.message)
 
-    def on_spider(self, msg):
+    def _on_spider(self, msg):
         if self.crawler is not None:
             raise MessageError('Spider already initialized')
         fields = {'streaming': self}
@@ -75,9 +81,17 @@ class Streaming(object):
         runner = CrawlerRunner()
         self.crawler = runner.create_crawler(StreamingSpider)
         dfd = runner.crawl(self.crawler, **fields)
-        dfd.addBoth(lambda _: reactor.stop())
+        dfd.addBoth(self._stop_reactor)
 
-    def on_request(self, msg):
+        self.logger.debug('Spider started: %s' % msg.name)
+
+    def _stop_reactor(self, *args):
+        try:
+            reactor.stop()
+        except RuntimeError:  # if the reactor is not running
+            pass
+
+    def _on_request(self, msg):
         # update request with id field
         request_id = msg.data.pop('id')
         meta = msg.data.pop('meta', {})
@@ -87,9 +101,12 @@ class Streaming(object):
         r = Request(callback=self.send_response, **msg.data)
         self.crawler.engine.crawl(r, self.crawler.spider)
 
-    def on_close(self, msg):
+    def _on_close(self, msg):
         self.crawler.stop()
         self.crawler.spider.close_spider()
+        self._stop_reactor()
+
+        self.logger.debug('Spider closed')
 
     def send_response(self, response):
         self.protocol.writeLine(CommunicationMap.response(response))

@@ -111,6 +111,14 @@ class StreamingCommandTest(ProjectTest):
 
         self.assertIn('sample1.py working', log)
 
+    def test_streaming_wrong_message(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        test1 = os.path.join(path, 'spiders', 'wrong_message.py')
+        p = self.proc('streaming', test1)
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('invalid_type is not a valid message type.', log)
+
     def test_streaming_args(self):
         path = os.path.abspath(os.path.dirname(__file__))
         test1 = os.path.join(path, 'spiders', 'sample1.py')
