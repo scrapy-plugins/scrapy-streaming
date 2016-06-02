@@ -32,10 +32,10 @@ class CommunicationMap(object):
                 raise MessageError('"type" field not provided.')
 
             msg_type = msg.pop('type')
-            try:
-                return CommunicationMap.mapping[msg_type].from_dict(msg)
-            except KeyError:
+            if msg_type not in CommunicationMap.mapping:
                 raise MessageError('%s is not a valid message type.' % msg_type)
+
+            return CommunicationMap.mapping[msg_type].from_dict(msg)
         except ValueError:
             raise MessageError('Received message is not a valid json.')
 
