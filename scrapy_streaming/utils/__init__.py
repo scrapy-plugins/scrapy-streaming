@@ -31,10 +31,7 @@ def extract_instance_fields(instance, fields):
     """
     data = {}
     for field in fields:
-        value = getattr(instance, field)
-        if isinstance(value, bytes):
-            value = to_unicode(value)
-        data[field] = value
+        data[field] = getattr(instance, field)
     return data
 
 

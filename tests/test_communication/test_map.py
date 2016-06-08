@@ -1,7 +1,10 @@
+import base64
+
 import simplejson as json
 
 from scrapy import Request
 from scrapy.http import Response
+from scrapy.utils.python import to_native_str
 from twisted.trial import unittest
 
 from scrapy_streaming.communication import CommunicationMap
@@ -39,4 +42,35 @@ class CommunicationMapTest(unittest.TestCase):
         resp = {'type': 'response', 'id': 'test', 'url': 'http://example.com',
                 'status': 200, 'headers': {}, 'body': '', 'flags': [], 'meta': {'request_id': 'test'}}
 
-        self.assertDictEqual(resp, json.loads(CommunicationMap.response(r)))
+        self.assertDictEqual(resp, json.loads(CommunicationMap.response(r, False)))
+
+    def test_response_binary(self):
+        req = Request('http://example.com/file.png')
+        req.meta['request_id'] = 'test'
+
+        img = b'the binary image data'
+        r = Response('http://example.com/file.png', request=req, body=img)
+
+        resp = {'type': 'response', 'id': 'test', 'url': 'http://example.com/file.png',
+                'status': 200, 'headers': {}, 'body': to_native_str(base64.b64encode(img)),
+                'flags': [], 'meta': {'request_id': 'test'}}
+
+        self.assertDictEqual(resp, json.loads(CommunicationMap.response(r, True)))
+
+    def test_response_binary_missing_encoding(self):
+        req = Request('http://example.com/file.png')
+        req.meta['request_id'] = 'test'
+
+        img = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00d\x00\x00\x00d\x08\x02\x00'
+        r = Response('http://example.com/file.png', request=req, body=img)
+
+        self.assertRaisesRegexp(ValueError, 'Response body is not serializable',
+                                CommunicationMap.response, r, False)
+
+    def test_exception(self):
+        line = '{"type": "log", "level": "debug", "message": "sample1.py working"}'
+        exception = 'Logger not found'
+
+        exc = {'type': 'exception', 'received_message': line, 'exception': exception}
+
+        self.assertDictEqual(exc, json.loads(CommunicationMap.exception(line, exception)))

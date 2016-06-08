@@ -10,7 +10,8 @@ from testfixtures import LogCapture
 from scrapy_streaming.streaming import Streaming
 from twisted.trial import unittest
 
-from scrapy_streaming.communication import LogMessage, SpiderMessage, MessageError, CloseMessage, RequestMessage
+from scrapy_streaming.communication import LogMessage, SpiderMessage, MessageError, CloseMessage, RequestMessage, \
+    FormRequestMessage, CommunicationMap
 
 
 class FakeProtocol(object):
@@ -62,12 +63,79 @@ class StreamingTest(unittest.TestCase):
 
         self.assertTrue(mock_method.called)
 
+    def test_request_message_missing_url_scheme(self):
+        request = RequestMessage.from_dict({'id': 'id', 'url': 'example.com'})
+
+        self.assertRaisesRegexp(MessageError, 'You must start your spider before sending this message', self.streaming.on_message, request)
+        self.create_spider()
+        with mock.patch.object(self.streaming, 'send_exception', return_value=None) as mock_method:
+            self.streaming.on_message(request)
+
+        self.assertTrue(mock_method.called)
+
+    def test_form_request_message(self):
+        msg_request = FormRequestMessage.from_dict({'id': 'id', 'url': 'http://example.com', 'form_request': {}})
+        fake_request = Request('http://example.com', meta={'request_id': 'id'})
+
+        self.assertRaisesRegexp(MessageError, 'You must start your spider before sending this message', self.streaming.on_message, msg_request)
+        self.create_spider()
+        with mock.patch.object(self.streaming.crawler.engine, 'crawl', return_value=None) as mock_method1:
+            self.streaming.on_message(msg_request)
+
+        response = Response(url='http://example.com', request=fake_request)
+        response.encoding = 'utf-8'
+        response.text = '<form></form>'
+        with mock.patch.object(self.streaming.crawler.engine, 'crawl', return_value=None) as mock_method2:
+            self.streaming._form_response(msg_request, response)
+
+        self.assertTrue(mock_method1.called)
+        self.assertTrue(mock_method2.called)
+
+    def test_form_request_missing_form(self):
+        msg_request = FormRequestMessage.from_dict({'id': 'id', 'url': 'http://example.com', 'form_request': {}})
+        fake_request = Request('http://example.com', meta={'request_id': 'id'})
+
+        self.assertRaisesRegexp(MessageError, 'You must start your spider before sending this message', self.streaming.on_message, msg_request)
+        self.create_spider()
+        with mock.patch.object(self.streaming.crawler.engine, 'crawl', return_value=None) as mock_method1:
+            self.streaming.on_message(msg_request)
+
+        response = Response(url='http://example.com', request=fake_request)
+        response.encoding = 'utf-8'
+        response.text = '<html><body><h1>Test</h1></body></html>'
+        with mock.patch.object(self.streaming, 'send_exception', return_value=None) as mock_method2:
+            self.streaming._form_response(msg_request, response)
+
+        self.assertTrue(mock_method1.called)
+        self.assertTrue(mock_method2.called)
+
     def test_response_message(self):
         req = Request('http://example.com')
         req.meta['request_id'] = 'test'
         response = Response(url='http://example.com', request=req)
-
+        msg = RequestMessage.from_dict({'id': 'test', 'url': 'http://example.com'})
         with mock.patch.object(self.streaming.protocol, 'writeLine') as mock_method:
-            self.streaming.send_response(response)
+            self.streaming.send_response(msg, response)
 
         self.assertTrue(mock_method.called)
+
+    def test_response_wrong_encoding(self):
+        req = Request('http://example.com')
+        req.meta['request_id'] = 'test'
+        response = Response(url='http://example.com', request=req,
+                            body=b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00d\x00\x00\x00d\x08\x02\x00')
+        msg = RequestMessage.from_dict({'id': 'test', 'url': 'http://example.com'})
+        with mock.patch.object(self.streaming, 'send_exception') as mock_method:
+            self.streaming.send_response(msg, response)
+
+        self.assertTrue(mock_method.called)
+
+    def test_exception_message(self):
+        class FakeMessage:
+            line = '{"type": "log", "level": "debug", "message": "sample1.py working"}'
+        msg = FakeMessage()
+        exception = 'Problem in spider'
+        with mock.patch.object(self.streaming.protocol, 'writeLine') as mock_method:
+            self.streaming.send_exception(msg, exception)
+
+        mock_method.assert_any_call(CommunicationMap.exception(msg.line, exception))
