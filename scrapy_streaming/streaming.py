@@ -1,10 +1,12 @@
 import logging
 
-from scrapy import Request
+from scrapy import Request, FormRequest
 from scrapy.crawler import CrawlerRunner
+from scrapy.utils.python import to_native_str
 from twisted.internet import reactor
 
-from scrapy_streaming.communication import CommunicationMap, LogMessage, SpiderMessage, RequestMessage, CloseMessage
+from scrapy_streaming.communication import CommunicationMap, LogMessage, SpiderMessage, RequestMessage, CloseMessage, \
+    FormRequestMessage
 from scrapy_streaming.communication.line_receiver import LineProcessProtocol
 from scrapy_streaming.utils import MessageError
 from scrapy_streaming.utils.spiders import StreamingSpider
@@ -32,8 +34,8 @@ class StreamingProtocol(LineProcessProtocol):
             self.sendError(line, str(e))
 
     def sendError(self, msg, details):
-        self.logger.log(logging.WARNING, msg)
-        self.logger.log(logging.WARNING, details)
+        self.logger.error('Received message: ' + to_native_str(msg))
+        self.logger.error(details)
         self.writeLine(CommunicationMap.error(msg, details))
 
     def errReceived(self, data):
@@ -61,6 +63,7 @@ class Streaming(object):
             LogMessage: self._on_log,
             SpiderMessage: self._on_spider,
             RequestMessage: self._on_request,
+            FormRequestMessage: self._on_form_request,
             CloseMessage: self._on_close
         }
 
@@ -91,14 +94,41 @@ class Streaming(object):
         except RuntimeError:  # if the reactor is not running
             pass
 
-    def _on_request(self, msg):
+    def _on_request(self, msg, callback=None):
+        if callback is None:
+            callback = self.send_response
         # update request with id field
         request_id = msg.data.pop('id')
         meta = msg.data.pop('meta', {})
         meta['request_id'] = request_id
         msg.data['meta'] = meta
 
-        r = Request(callback=self.send_response, **msg.data)
+        try:
+            r = Request(callback=lambda x: callback(msg, x),
+                        errback=lambda x: self.send_exception(msg, x.getErrorMessage()),
+                        **msg.data)
+        except (ValueError, TypeError) as e:  # errors raised by request creator
+            self.send_exception(msg, str(e))
+            return
+        self.crawler.engine.crawl(r, self.crawler.spider)
+
+    def _on_form_request(self, msg):
+        self._on_request(msg, self._form_response)
+
+    def _form_response(self, msg, response):
+        request_id = response.meta['request_id']
+
+        meta = msg.form_request.data.pop('meta', {})
+        meta['request_id'] = request_id
+        msg.form_request.data['meta'] = meta
+        try:
+            # check for possible problems in the response
+            r = FormRequest.from_response(response, callback=lambda x: self.send_response(msg, x),
+                                          errback=lambda x: self.send_exception(msg, x.getErrorMessage()),
+                                          **msg.form_request.data)
+        except (ValueError, IndexError) as e:  # errors raised by from_response
+            self.send_exception(msg, str(e))
+            return
         self.crawler.engine.crawl(r, self.crawler.spider)
 
     def _on_close(self, msg):
@@ -108,5 +138,11 @@ class Streaming(object):
 
         self.logger.debug('Spider closed')
 
-    def send_response(self, response):
-        self.protocol.writeLine(CommunicationMap.response(response))
+    def send_response(self, msg, response):
+        try:
+            self.protocol.writeLine(CommunicationMap.response(response, msg.base64))
+        except ValueError as e:  # problems in the encoding
+            self.send_exception(msg, str(e))
+
+    def send_exception(self, msg, details):
+        self.protocol.writeLine(CommunicationMap.exception(msg.line, details))

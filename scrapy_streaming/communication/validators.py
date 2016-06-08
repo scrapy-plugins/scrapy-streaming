@@ -25,8 +25,10 @@ class MessageValidator(object):
         self.update(default, fields)
 
     @classmethod
-    def from_dict(cls, data):
-        return cls(data)
+    def from_dict(cls, data, line=None):
+        c = cls(data)
+        c.line = line
+        return c
 
     def validate(self, data):
         """
@@ -61,15 +63,49 @@ class RequestMessage(MessageValidator):
     validator = {'id': six.string_types, 'url': six.string_types, 'method': six.string_types,
                  'meta': dict, 'body': six.string_types, 'headers': dict,
                  'cookies': (dict, list), 'encoding': six.string_types,
-                 'priority': int, 'dont_filter': bool}
+                 'priority': int, 'dont_filter': bool, 'base64': bool}
 
     def __init__(self, fields):
         default = {'id': RequiredField(), 'url': RequiredField(), 'method': EmptyField(),
                    'meta': EmptyField(), 'body': EmptyField(), 'headers': EmptyField(),
                    'cookies': EmptyField(), 'encoding': EmptyField(), 'priority': EmptyField(),
-                   'dont_filter': EmptyField()}
+                   'dont_filter': EmptyField(), 'base64': False}
 
         super(RequestMessage, self).__init__(default, fields)
+        self.data.pop('base64', None)
+
+
+class Form(MessageValidator):
+    validator = {'formname': six.string_types, 'formxpath': six.string_types,
+                 'formcss': six.string_types, 'formnumber': six.string_types,
+                 'formdata': dict, 'clickdata': dict, 'dont_click': bool,
+                 # request fields
+                 'method': six.string_types, 'meta': dict, 'body': six.string_types,
+                 'headers': dict, 'cookies': (dict, list), 'encoding': six.string_types,
+                 'priority': int, 'dont_filter': bool}
+
+    def __init__(self, form):
+        default = {'formname': EmptyField(), 'formxpath': EmptyField(),
+                   'formcss': EmptyField(), 'formnumber': EmptyField(),
+                   'formdata': EmptyField(), 'clickdata': EmptyField(),
+                   'dont_click': EmptyField(),
+                   # request fields
+                   'method': EmptyField(), 'meta': EmptyField(), 'body': EmptyField(),
+                   'headers': EmptyField(), 'cookies': EmptyField(), 'encoding': EmptyField(),
+                   'priority': EmptyField(), 'dont_filter': EmptyField()}
+
+        super(Form, self).__init__(default, form)
+
+
+class FormRequestMessage(RequestMessage):
+
+    def __init__(self, fields):
+        if 'form_request' not in fields:
+            raise MessageError('Required field: form_request')
+        form_request = fields.pop('form_request')
+
+        super(FormRequestMessage, self).__init__(fields)
+        self.form_request = Form.from_dict(form_request)
 
 
 class SpiderMessage(MessageValidator):
