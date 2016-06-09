@@ -183,6 +183,7 @@ so each response can be easily identified by its id.
         "type": "request",
         "id": string,
         "url": string,
+        *"base64": bool,
         *"method": string,
         *"meta": object,
         *"body": string,
@@ -192,6 +193,12 @@ so each response can be easily identified by its id.
         *"priority": int,
         *"dont_filter": boolean
     }
+
+If the ``base64`` parameter is ``true``, the response body will be encoded using base64.
+
+.. note:: Binary responses, such as files, images, videos, etc, must be encoded with base64.
+          Therefore, when using scrapy-streaming to download binary data, you **must** set the
+          ``base64`` parameter to ``true`` and decode the response's body with the base64 encoding.
 
 .. message:: form_request
 
