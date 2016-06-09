@@ -4,6 +4,7 @@ from scrapy import Request, FormRequest
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.python import to_native_str
 from twisted.internet import reactor
+from twisted.internet.error import ProcessExitedAlready
 
 from scrapy_streaming.communication import CommunicationMap, LogMessage, SpiderMessage, RequestMessage, CloseMessage, \
     FormRequestMessage
@@ -22,6 +23,7 @@ class StreamingProtocol(LineProcessProtocol):
         super(StreamingProtocol, self).__init__()
         self.logger = logging.getLogger(self.__class__.__name__)
         self.streaming = Streaming(self)
+        self._closing = False
 
     def connectionMade(self):
         self.writeLine(CommunicationMap.ready())
@@ -37,13 +39,29 @@ class StreamingProtocol(LineProcessProtocol):
         self.logger.error('Received message: ' + to_native_str(msg))
         self.logger.error(details)
         self.writeLine(CommunicationMap.error(msg, details))
+        self.closeProcess()
 
     def errReceived(self, data):
-        print(data)
+        self.logger.error('Received error from external spider')
+        self.logger.error(data)
+        self.logger.error('Closing the process due to this error')
+        self.closeProcess()
 
-    def processEnded(self, reason):
+    def processEnded(self, status):
+        self.closeProcess()
+
+    def closeProcess(self):
+        if self._closing:
+            return
+        self._closing = True
+        self.transport.loseConnection()
+        try:  # kill the process if it still running
+            pid = self.transport.pid
+            self.transport.signalProcess('KILL')
+            self.logger.debug('Killing the process %s' % pid)
+        except ProcessExitedAlready:
+            pass
         reactor.stop()
-        # FIXME add a valid process listener
 
 
 class Streaming(object):
@@ -78,21 +96,15 @@ class Streaming(object):
     def _on_spider(self, msg):
         if self.crawler is not None:
             raise MessageError('Spider already initialized')
-        fields = {'streaming': self}
+        fields = {'streaming': self, 'msg': msg}
         fields.update(msg.data)
 
         runner = CrawlerRunner()
         self.crawler = runner.create_crawler(StreamingSpider)
         dfd = runner.crawl(self.crawler, **fields)
-        dfd.addBoth(self._stop_reactor)
+        dfd.addBoth(lambda x: self.protocol.closeProcess())
 
         self.logger.debug('Spider started: %s' % msg.name)
-
-    def _stop_reactor(self, *args):
-        try:
-            reactor.stop()
-        except RuntimeError:  # if the reactor is not running
-            pass
 
     def _on_request(self, msg, callback=None):
         if callback is None:
@@ -107,10 +119,9 @@ class Streaming(object):
             r = Request(callback=lambda x: callback(msg, x),
                         errback=lambda x: self.send_exception(msg, x.getErrorMessage()),
                         **msg.data)
+            self.crawler.engine.crawl(r, self.crawler.spider)
         except (ValueError, TypeError) as e:  # errors raised by request creator
             self.send_exception(msg, str(e))
-            return
-        self.crawler.engine.crawl(r, self.crawler.spider)
 
     def _on_form_request(self, msg):
         self._on_request(msg, self._form_response)
@@ -126,15 +137,14 @@ class Streaming(object):
             r = FormRequest.from_response(response, callback=lambda x: self.send_response(msg, x),
                                           errback=lambda x: self.send_exception(msg, x.getErrorMessage()),
                                           **msg.form_request.data)
+            self.crawler.engine.crawl(r, self.crawler.spider)
         except (ValueError, IndexError) as e:  # errors raised by from_response
             self.send_exception(msg, str(e))
-            return
-        self.crawler.engine.crawl(r, self.crawler.spider)
 
     def _on_close(self, msg):
         self.crawler.stop()
         self.crawler.spider.close_spider()
-        self._stop_reactor()
+        self.protocol.closeProcess()
 
         self.logger.debug('Spider closed')
 
@@ -145,4 +155,6 @@ class Streaming(object):
             self.send_exception(msg, str(e))
 
     def send_exception(self, msg, details):
+        self.logger.error('Scrapy raised an exception')
+        self.logger.error(details)
         self.protocol.writeLine(CommunicationMap.exception(msg.line, details))

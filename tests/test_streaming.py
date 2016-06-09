@@ -19,6 +19,9 @@ class FakeProtocol(object):
     def writeLine(self, data):
         pass
 
+    def closeProcess(self):
+        pass
+
 
 class StreamingTest(unittest.TestCase):
 

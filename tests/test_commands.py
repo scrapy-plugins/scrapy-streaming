@@ -127,6 +127,22 @@ class StreamingCommandTest(ProjectTest):
 
         self.assertIn('sample1.py working', log)
 
+    def test_streaming_request_exception(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        test1 = os.path.join(path, 'spiders', 'request_exception.py')
+        p = self.proc('streaming', test1)
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('Scrapy raised an exception', log)
+
+    def test_streaming_external_error(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        test1 = os.path.join(path, 'spiders', 'error_spider.py')
+        p = self.proc('streaming', test1)
+        log = to_native_str(p.stderr.read())
+
+        self.assertIn('Closing the process due to this error', log)
+
 
 class CrawlCommandTest(ProjectTest):
 
