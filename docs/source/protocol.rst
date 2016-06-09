@@ -124,9 +124,19 @@ its extracted value (string).
 
 exception
 ---------
-Exceptions are thrown when Scrapy faces a runtime error.
+Exceptions are thrown when Scrapy faces a runtime error, such as requesting an invalid domain, being unable to
+find a form in a :message:`form_request`, etc.
 
-.. warning:: TODO. Add more details here. I need to implement to get more details about what can be an exception.
+Each :message:`exception` contains the received message that caused this error, and the exception's message.
+
+.. code-block:: python
+
+    {
+        "type": "exception",
+        "received_message": string,
+        "exception": string
+    }
+
 
 .. message:: error
 
