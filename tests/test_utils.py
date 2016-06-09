@@ -2,7 +2,7 @@ import os
 
 from scrapy import Request
 from scrapy.http import Response
-from scrapy_streaming.streaming import Streaming
+from scrapy_streaming.streaming import Streaming, StreamingProtocol
 from twisted.internet.defer import Deferred
 
 from scrapy_streaming.utils.spiders import StreamingSpider
@@ -47,17 +47,14 @@ class UtilsTest(ProjectTest):
         self.assertDictEqual(extract_instance_fields(Test(), fields), expected)
 
     def test_streaming_spider_parse(self):
-        class FakeStreaming(object):
-            def send_response(self, resp):
-                pass
-
-        spider = StreamingSpider(streaming=FakeStreaming(), name='sample', start_urls=[])
+        spider = StreamingSpider(streaming=Streaming(protocol=StreamingProtocol()),
+                                 name='sample', start_urls=[])
 
         req = Request('http://example.com')
         req.meta['request_id'] = 'test'
         fake_response = Response('http://example.com', request=req)
 
-        with mock.patch.object(spider.streaming, 'send_response') as mock_send:
+        with mock.patch.object(spider.streaming.protocol, 'writeLine') as mock_send:
             self.assertIsInstance(spider.parse(fake_response), Deferred)
 
         self.assertTrue(mock_send.called)
