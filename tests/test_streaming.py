@@ -28,6 +28,13 @@ class StreamingTest(unittest.TestCase):
     def setUp(self):
         self.streaming = Streaming(FakeProtocol())
 
+    def tearDown(self):
+        try:
+            # try to clean the reactor, if necessary
+            self.streaming._on_close(None)
+        except:
+            pass
+
     def create_spider(self, name='sample'):
         spider = SpiderMessage.from_dict({'name': name, 'start_urls': []})
         self.streaming.on_message(spider)
