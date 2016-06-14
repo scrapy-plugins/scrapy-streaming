@@ -48,6 +48,7 @@ class StreamingProtocol(LineProcessProtocol):
         self.closeProcess()
 
     def processEnded(self, status):
+        self.logger.debug("Process ended")
         self.closeProcess()
 
     def closeProcess(self):

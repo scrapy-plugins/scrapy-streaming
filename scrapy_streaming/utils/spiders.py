@@ -1,4 +1,6 @@
+import scrapy
 from scrapy import Spider
+from scrapy.exceptions import DontCloseSpider
 from scrapy.http import Request
 from twisted.internet import defer
 
@@ -10,6 +12,7 @@ class StreamingSpider(Spider):
         self.msg = msg
         super(StreamingSpider, self).__init__(**kwargs)
         self.stream = defer.Deferred()
+        self._done = False
 
     def parse(self, response):
         # sets the default encoding type with a fake request message
@@ -24,6 +27,7 @@ class StreamingSpider(Spider):
 
     def close_spider(self):
         self.stream.callback(None)
+        self._done = True
 
     def make_requests_from_url(self, url):
         # adds errback to spider initial requests
@@ -37,3 +41,14 @@ class StreamingSpider(Spider):
                 yield self.make_requests_from_url(url)
             except (ValueError, TypeError) as e:  # errors raised by request creator
                 self.streaming.send_exception(self.msg, str(e))
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        from_crawler = super(StreamingSpider, cls).from_crawler
+        spider = from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.keep_alive, signal=scrapy.signals.spider_idle)
+        return spider
+
+    def keep_alive(self, spider):
+        if not self._done:
+            raise DontCloseSpider()
