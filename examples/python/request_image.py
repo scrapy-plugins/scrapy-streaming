@@ -13,11 +13,11 @@ def main():
     write_line('''
         {
             "type": "spider",
-            "name": "status",
+            "name": "image",
             "start_urls": []
         }
         ''')
-        
+
     write_line('''
             {
                 "type": "request",
@@ -25,7 +25,7 @@ def main():
                 "url": "http://httpbin.org/image/png",
                 "base64": true
             }''')
-            
+
     msg = parse_json(stdin.readline())
 
     # check the message type
@@ -37,8 +37,8 @@ def main():
         with open('outputs/image.png', 'wb') as f:
             f.write(img)
         write_line('{"type": "log", "level": "debug", "message": "DONE"}')
-    
+
     write_line('{"type": "close"}')
-    
+
 if __name__ == '__main__':
     main()

@@ -33,7 +33,7 @@ def response_repo(response):
     # using scrapy selector
     selector = Selector(text=response['body'])
     # get the desired field
-    title = selector.css('h1.entry-title strong a::text').extract_first()
+    title = selector.css('h1.public strong a::text').extract_first()
     stars = int(selector.css('a.social-count::text').extract()[1])
     issues = int(selector.css('span.counter::text').extract()[0])
     pr = int(selector.css('span.counter::text').extract()[1])

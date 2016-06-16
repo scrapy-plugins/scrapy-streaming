@@ -30,10 +30,10 @@ def main():
                     }
                 }
             }''')
-    
+
     response = stdin.readline()
     data = parse_json(response)
-    
+
     with open('outputs/login_result.json', 'w') as f:
         if 'Incorrect username or password' in data['body']:
             write_line('{"type": "log", "level": "ERROR", "message": "Invalid password"}')

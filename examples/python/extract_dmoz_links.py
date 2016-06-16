@@ -34,7 +34,7 @@ def response_category(response):
     selector = Selector(text=response['body'])
     # get div with link and title
     divs = selector.css('div.title-and-desc')
-    
+
     for div in divs:
         url = div.css("a::attr('href')").extract_first();
         title = div.css("a > div.site-title::text").extract_first();
@@ -80,4 +80,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
