@@ -4,7 +4,7 @@ import six
 from twisted.trial import unittest
 
 from scrapy_streaming.communication import MessageValidator, RequestMessage, SpiderMessage, LogMessage, CloseMessage, \
-    FormRequestMessage
+    FromResponseRequestMessage
 from scrapy_streaming.utils import MessageError
 from scrapy_streaming.utils.fields import RequiredField, EmptyField
 
@@ -65,7 +65,7 @@ class MessagesTest(unittest.TestCase):
 
     def test_create_messages(self):
         RequestMessage({'id': u'id', 'url': u'http://example.com'})
-        FormRequestMessage({'id': u'id', 'url': u'http://example.com', "form_request": {}})
+        FromResponseRequestMessage({'id': u'id', 'url': u'http://example.com', "from_response_request": {}})
         SpiderMessage({'name': u'name', 'start_urls': []})
         LogMessage({'message': u'message', 'level': u'debug'})
         CloseMessage({})
@@ -94,7 +94,7 @@ class MessagesTest(unittest.TestCase):
 
         self.assertRaisesRegexp(MessageError, 'Invalid log level: mycustomlevel', LogMessage.from_dict, msg)
 
-    def test_form_request_params(self):
+    def test_from_response_request_params(self):
         fields = {'id': u'id', 'url': u'http://example.com'}
 
-        self.assertRaisesRegexp(MessageError, 'Required field: form_request', FormRequestMessage.from_dict, fields)
+        self.assertRaisesRegexp(MessageError, 'Required field: from_response_request', FromResponseRequestMessage.from_dict, fields)

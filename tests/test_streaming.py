@@ -11,7 +11,7 @@ from scrapy_streaming.streaming import Streaming
 from twisted.trial import unittest
 
 from scrapy_streaming.communication import LogMessage, SpiderMessage, MessageError, CloseMessage, RequestMessage, \
-    FormRequestMessage, CommunicationMap
+    FromResponseRequestMessage, CommunicationMap
 
 
 class FakeProtocol(object):
@@ -83,8 +83,8 @@ class StreamingTest(unittest.TestCase):
 
         self.assertTrue(mock_method.called)
 
-    def test_form_request_message(self):
-        msg_request = FormRequestMessage.from_dict({'id': 'id', 'url': 'http://example.com', 'form_request': {}})
+    def test_from_response_equest_message(self):
+        msg_request = FromResponseRequestMessage.from_dict({'id': 'id', 'url': 'http://example.com', 'from_response_request': {}})
         fake_request = Request('http://example.com', meta={'request_id': 'id'})
 
         self.assertRaisesRegexp(MessageError, 'You must start your spider before sending this message', self.streaming.on_message, msg_request)
@@ -96,13 +96,13 @@ class StreamingTest(unittest.TestCase):
         response.encoding = 'utf-8'
         response.text = '<form></form>'
         with mock.patch.object(self.streaming.crawler.engine, 'crawl', return_value=None) as mock_method2:
-            self.streaming._form_response(msg_request, response)
+            self.streaming._from_response(msg_request, response)
 
         self.assertTrue(mock_method1.called)
         self.assertTrue(mock_method2.called)
 
-    def test_form_request_missing_form(self):
-        msg_request = FormRequestMessage.from_dict({'id': 'id', 'url': 'http://example.com', 'form_request': {}})
+    def test_from_response_request_missing_form(self):
+        msg_request = FromResponseRequestMessage.from_dict({'id': 'id', 'url': 'http://example.com', 'from_response_request': {}})
         fake_request = Request('http://example.com', meta={'request_id': 'id'})
 
         self.assertRaisesRegexp(MessageError, 'You must start your spider before sending this message', self.streaming.on_message, msg_request)
@@ -114,7 +114,7 @@ class StreamingTest(unittest.TestCase):
         response.encoding = 'utf-8'
         response.text = '<html><body><h1>Test</h1></body></html>'
         with mock.patch.object(self.streaming, 'send_exception', return_value=None) as mock_method2:
-            self.streaming._form_response(msg_request, response)
+            self.streaming._from_response(msg_request, response)
 
         self.assertTrue(mock_method1.called)
         self.assertTrue(mock_method2.called)

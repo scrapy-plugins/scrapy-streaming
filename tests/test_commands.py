@@ -143,6 +143,14 @@ class StreamingCommandTest(ProjectTest):
 
         self.assertIn('Closing the process due to this error', log)
 
+    def test_multiple_messages_streaming(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        test1 = os.path.join(path, 'spiders', 'multiple_data.py')
+        p = self.proc('streaming', test1)
+        log = to_native_str(p.stderr.read())
+
+        self.assertEqual(log.count("qwertyuiop"), 1000)
+
 
 class CrawlCommandTest(ProjectTest):
 

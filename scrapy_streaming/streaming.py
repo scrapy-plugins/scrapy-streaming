@@ -7,7 +7,7 @@ from twisted.internet import reactor
 from twisted.internet.error import ProcessExitedAlready
 
 from scrapy_streaming.communication import CommunicationMap, LogMessage, SpiderMessage, RequestMessage, CloseMessage, \
-    FormRequestMessage
+    FromResponseRequestMessage
 from scrapy_streaming.communication.line_receiver import LineProcessProtocol
 from scrapy_streaming.utils import MessageError
 from scrapy_streaming.utils.spiders import StreamingSpider
@@ -82,7 +82,7 @@ class Streaming(object):
             LogMessage: self._on_log,
             SpiderMessage: self._on_spider,
             RequestMessage: self._on_request,
-            FormRequestMessage: self._on_form_request,
+            FromResponseRequestMessage: self._on_from_response_request,
             CloseMessage: self._on_close
         }
 
@@ -124,20 +124,20 @@ class Streaming(object):
         except (ValueError, TypeError) as e:  # errors raised by request creator
             self.send_exception(msg, str(e))
 
-    def _on_form_request(self, msg):
-        self._on_request(msg, self._form_response)
+    def _on_from_response_request(self, msg):
+        self._on_request(msg, self._from_response)
 
-    def _form_response(self, msg, response):
+    def _from_response(self, msg, response):
         request_id = response.meta['request_id']
 
-        meta = msg.form_request.data.pop('meta', {})
+        meta = msg.from_response_request.data.pop('meta', {})
         meta['request_id'] = request_id
-        msg.form_request.data['meta'] = meta
+        msg.from_response_request.data['meta'] = meta
         try:
             # check for possible problems in the response
             r = FormRequest.from_response(response, callback=lambda x: self.send_response(msg, x),
                                           errback=lambda x: self.send_exception(msg, x.getErrorMessage()),
-                                          **msg.form_request.data)
+                                          **msg.from_response_request.data)
             self.crawler.engine.crawl(r, self.crawler.spider)
         except (ValueError, IndexError) as e:  # errors raised by from_response
             self.send_exception(msg, str(e))
