@@ -37,8 +37,9 @@ Scrapy Streaming Messages:
 External Spider Messages:
 
 * :message:`spider`
+* :message:`log`
 * :message:`request`
-* :message:`form_request`
+* :message:`from_response_request`
 * :message:`selector_request`
 * :message:`item_selector_request`
 * :message:`close`
@@ -180,6 +181,30 @@ Read the :class:`~scrapy.spiders.Spider` docs for more information.
 
 .. message:: request
 
+log
+---
+
+Log message allows the external spider to add log messages in the scrapy streaming output.
+This may be helpful in the spider development to track variables, responses, etc.
+
+The log message is defined as follows:
+
+.. code-block:: python
+
+    {
+        "type": "log",
+        "message": string,
+        "level": string
+    }
+
+The message level must be one of the following:
+
+* ``CRITICAL`` - for critical errors (highest severity)
+* ``ERROR`` - for regular errors
+* ``WARNING`` - for warning messages
+* ``INFO`` - for informational messages
+* ``DEBUG`` - for debugging messages (lowest severity)
+
 request
 -------
 To open new requests in the running spider, use the request message. Read the :class:`~scrapy.http.Request` for more information.
@@ -210,28 +235,28 @@ If the ``base64`` parameter is ``true``, the response body will be encoded using
           Therefore, when using scrapy-streaming to download binary data, you **must** set the
           ``base64`` parameter to ``true`` and decode the response's body with the base64 encoding.
 
-.. message:: form_request
+.. message:: from_response_request
 
-form_request
-------------
-The :message:`form_request` uses the :meth:`~scrapy.http.FormRequest.from_response` method.
+from_response_request
+---------------------
+The :message:`from_response_request` uses the :meth:`~scrapy.http.FormRequest.from_response` method.
 Check the :class:`~scrapy.http.FormRequest` for more information.
 
 It first creates a :class:`~scrapy.http.Request` and then use the response to create the :class:`~scrapy.http.FormRequest`
 
-The type of this message is :message:`form_request`, it contains all fields described in :message:`request` doc,
-and the :meth:`~scrapy.http.FormRequest.from_response` data in the ``form_request`` field.
+The type of this message is :message:`from_response_request`, it contains all fields described in :message:`request` doc,
+and the :meth:`~scrapy.http.FormRequest.from_response` data in the ``from_response_request`` field.
 
 You can define it as follows:
 
 .. code-block:: python
 
     {
-        "type": "form_request",
+        "type": "from_response_request",
 
         ... // all request's fields here
 
-        "form_request": {
+        "from_response_request": {
             *"formname": string,
             *"formxpath": string,
             *"formcss": string,
@@ -242,7 +267,7 @@ You can define it as follows:
         }
     }
 
-The :message:`form_request` will return the response obtained from :class:`~scrapy.http.FormRequest` if
+The :message:`from_response_request` will return the response obtained from :class:`~scrapy.http.FormRequest` if
 successful.
 
 .. message:: selector_request
