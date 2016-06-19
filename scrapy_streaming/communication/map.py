@@ -16,7 +16,7 @@ class CommunicationMap(object):
     mapping = {
         'spider': validators.SpiderMessage,
         'request': validators.RequestMessage,
-        'form_request': validators.FormRequestMessage,
+        'from_response_request': validators.FromResponseRequestMessage,
         'log': validators.LogMessage,
         'close': validators.CloseMessage
     }

@@ -97,15 +97,15 @@ class Form(MessageValidator):
         super(Form, self).__init__(default, form)
 
 
-class FormRequestMessage(RequestMessage):
+class FromResponseRequestMessage(RequestMessage):
 
     def __init__(self, fields):
-        if 'form_request' not in fields:
-            raise MessageError('Required field: form_request')
-        form_request = fields.pop('form_request')
+        if 'from_response_request' not in fields:
+            raise MessageError('Required field: from_response_request')
+        from_response_request = fields.pop('from_response_request')
 
-        super(FormRequestMessage, self).__init__(fields)
-        self.form_request = Form.from_dict(form_request)
+        super(FromResponseRequestMessage, self).__init__(fields)
+        self.from_response_request = Form.from_dict(from_response_request)
 
 
 class SpiderMessage(MessageValidator):
