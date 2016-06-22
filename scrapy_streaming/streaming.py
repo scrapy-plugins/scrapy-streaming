@@ -156,6 +156,6 @@ class Streaming(object):
             self.send_exception(msg, str(e))
 
     def send_exception(self, msg, details):
-        self.logger.error('Scrapy raised an exception')
-        self.logger.error(details)
+        self.logger.error('Scrapy raised an exception: ' + details)
+        self.logger.error('Caused by: ' + to_native_str(msg.line))
         self.protocol.writeLine(CommunicationMap.exception(msg.line, details))
