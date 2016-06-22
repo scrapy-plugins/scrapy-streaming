@@ -20,10 +20,10 @@ def main():
 
     write_line('''
             {
-                "type": "form_request",
+                "type": "from_response_request",
                 "id": "login",
                 "url": "https://github.com/login",
-                "form_request": {
+                "from_response_request": {
                     "formdata": {
                         "login": "email@example.com",
                         "password": "password"

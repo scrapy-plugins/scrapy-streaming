@@ -1,35 +1,6 @@
 #!/usr/bin/env Rscript
-suppressMessages(library(jsonlite))
+suppressMessages(library(scrapystreaming))
 suppressMessages(library(rvest))
-
-
-std_in <- file("stdin")
-open(std_in)
-
-get_json <- function() {
-    line <- readLines(std_in, n = 1)
-    return(fromJSON(line))
-}
-
-write_json <- function(line) {
-    line <- strwrap(line, width = 1000, simplify = TRUE)
-    write(line, stdout())
-    flush(stdout())
-}
-
-# get and check the communication channel status
-status <- get_json()
-
-if (status$status != "ready") {
-    stop("There is problem in the communication channel")
-}
-
-# create the spider
-write_json('{
-    "type": "spider",
-    "name": "github",
-    "start_urls": ["https://github.com/scrapy-plugins"]
-}')
 
 pending_requests <- 0
 result <- list()
@@ -42,12 +13,7 @@ response_parse <- function(response) {
         # we count the number of requests using this var
         pending_requests <<- pending_requests + 1
         # open a new request to each subcategories
-        write_json(sprintf('{
-            "type": "request",
-            "id": "repo",
-            "url": "https://github.com%s"
-        }
-        ', html_attr(a, "href")))
+        send_request(sprintf("https://github.com%s", html_attr(a, "href")), response_repo)
     }
 }
 
@@ -72,23 +38,9 @@ response_repo <- function(response) {
         # serialize the extracted data and close the spider
         write(toJSON(result), f)
         close(f)
-        write_json('{"type": "close"}')
+        close_spider()
     }
 }
 
-
-while (TRUE) {
-    msg <- get_json()
-
-    # check if got a problem in the spider
-    if (msg$type == "exception" || msg$type == "error") {
-        stop("Something wrong")
-    } else if (msg$type == "response") {
-        # we check the id of the incoming response, and call a function
-        # to extract the data from each page
-        if (msg$id == "parse")
-            response_parse(msg)
-        else if (msg$id == "repo")
-            response_repo(msg)
-    }
-}
+create_spider("github", c("https://github.com/scrapy-plugins"), response_parse)
+run_spider()

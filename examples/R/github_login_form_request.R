@@ -1,48 +1,19 @@
 #!/usr/bin/env Rscript
-suppressMessages(library(jsonlite))
+suppressMessages(library(scrapystreaming))
 
-std_in <- file("stdin")
-open(std_in)
-
-get_json <- function() {
-    line <- readLines(std_in, n = 1)
-    return(fromJSON(line))
-}
-
-write_json <- function(line) {
-    line <- strwrap(line, width = 1000, simplify = TRUE)
-    write(line, stdout())
-    flush(stdout())
-}
-
-status <- get_json()
-
-if (status["status"] != "ready") {
-    stop("There is problem in the communication channel")
-}
-
-write_json('{
-    "type": "spider",
-    "name": "login",
-    "start_urls": []
-}')
-
-write_json('{
-    "type": "form_request",
-    "id": "login",
-    "url": "https://github.com/login",
-    "form_request": {
-        "formdata": {
-            "login": "email@example.com",
-            "password": "password"
-        }
+check_login <- function(response) {
+    if (length(grep("Incorrect username or password", response$body)) > 0) {
+        send_log("Invalid password", "error")
+    } else {
+        send_log("Logged!")
     }
-}')
-
-response <- get_json()
-
-if (length(grep("Incorrect username or password", response["body"])) > 0) {
-    write_json('{"type": "log", "level": "ERROR", "message": "Invalid password"}')
-} else {
-    write_json('{"type": "log", "level": "debug", "message": "DONE"}')
+    close_spider()
 }
+
+create_spider("login", character(0))
+from_response_request <- data.frame(formdata = character(1))
+from_response_request$formdata <- data.frame(login = "email@example.com", "password" = "password")
+
+send_from_response_request("https://github.com/login", check_login, from_response_request)
+
+run_spider()
