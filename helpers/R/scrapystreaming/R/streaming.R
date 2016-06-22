@@ -230,8 +230,15 @@ send_request <- function(url, callback, base64, method, meta, body, headers, coo
 #' my_callback <- function (response) {
 #'  print(response)
 #' }
-#' send_from_response_request("http://example.com", my_callback,
-#'              data.frame(formcss = "#login_form", formdata = data.frame(user = "admin", pass = "1")))
+#'
+#' # first we defined the dataframe structure
+#' from_response_request <- data.frame(formcss = character(1), formdata = character(1))
+#'
+#' # then we put the dataframe data
+#' from_response_request$formcss <- "#login_form"
+#' from_response_request$formdata <- data.frame(user = "admin", pass = "1")
+#'
+#' send_from_response_request("http://example.com", my_callback, from_response_request)
 #'
 #' @export
 send_from_response_request <- function(url, callback, from_response_request, base64, method, meta, body, headers, cookies, encoding, priority, dont_filter) {
@@ -327,6 +334,22 @@ send_from_response_request <- function(url, callback, from_response_request, bas
         stopifnot(is.numeric(from_response_request$priority) && length(from_response_request$priority) == 1)
     if (!is.null(from_response_request$dont_filter))
         stopifnot(is.logical(from_response_request$dont_filter) && length(from_response_request$dont_filter) == 1)
+
+    # from_response
+    if (!is.null(from_response_request$formname))
+        stopifnot(is.character(from_response_request$formname) && length(from_response_request$formname) == 1)
+    if (!is.null(from_response_request$formxpath))
+        stopifnot(is.character(from_response_request$formxpath) && length(from_response_request$formxpath) == 1)
+    if (!is.null(from_response_request$formcss))
+        stopifnot(is.character(from_response_request$formcss) && length(from_response_request$formcss) == 1)
+    if (!is.null(from_response_request$formnumber))
+        stopifnot(is.character(from_response_request$formnumber) && length(from_response_request$formnumber) == 1)
+    if (!is.null(from_response_request$formdata))
+        stopifnot(is.data.frame(from_response_request$formdata))
+    if (!is.null(from_response_request$clickdata))
+        stopifnot(is.data.frame(from_response_request$clickdata))
+    if (!is.null(from_response_request$dont_click))
+        stopifnot(is.logical(from_response_request$dont_click) && length(from_response_request$dont_click) == 1)
 
     json <- gen_json(request)
     write_json(json)

@@ -41,8 +41,15 @@ Check the ScrapyStreaming and Scrapy documentations for more information about t
 my_callback <- function (response) {
  print(response)
 }
-send_from_response_request("http://example.com", my_callback,
-             data.frame(formcss = "#login_form", formdata = data.frame(user = "admin", pass = "1")))
+
+# first we defined the dataframe structure
+from_response_request <- data.frame(formcss = character(1), formdata = character(1))
+
+# then we put the dataframe data
+from_response_request$formcss <- "#login_form"
+from_response_request$formdata <- data.frame(user = "admin", pass = "1")
+
+send_from_response_request("http://example.com", my_callback, from_response_request)
 
 }
 
