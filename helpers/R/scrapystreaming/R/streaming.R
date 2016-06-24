@@ -380,7 +380,6 @@ send_log <- function(message, level) {
 
     json <- gen_json(log)
     write_json(json)
-    return(json)
 }
 
 #' Read and returns a stdin line
