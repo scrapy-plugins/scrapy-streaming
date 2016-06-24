@@ -6,9 +6,6 @@
 \usage{
 close_spider()
 }
-\value{
-the json message sent to stdout
-}
 \description{
 Send a message to close the spider
 }

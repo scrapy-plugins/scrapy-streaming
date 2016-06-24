@@ -57,35 +57,38 @@ streaming.env$mapping <- list("error" = throw_error, "exception" = throw_error, 
 #'
 #' create_spider(name = "sample",
 #'               start_urls = "http://example.com",
-#'               allowed_domains = c("example.com", "dmoz.org"),
 #'               callback = parse,
+#'               allowed_domains = c("example.com", "dmoz.org"),
 #'               custom_settings = data.frame("SOME_SETTING" = "some value"))
 #'
 #' @export
 create_spider <- function(name, start_urls, callback, allowed_domains, custom_settings){
     stopifnot(is.character(name) && length(name) == 1)
     stopifnot(is.character(start_urls) && is.vector(start_urls))
+
+    spider <- data.frame(type = "spider", name = name)
+
     if (length(start_urls) > 0) {
         stopifnot(is.function(callback))
         streaming.env$response_mapping["parse"] <- list(callback)
     } else {
-        callback <- NULL;
+        callback <- NULL
     }
-    if (missing(allowed_domains))
-        allowed_domains = c()
-    else
-        stopifnot(is.character(allowed_domains) && is.vector(allowed_domains))
-    if (missing(custom_settings))
-        custom_settings = c()
-    else
-        stopifnot(is.data.frame(custom_settings) && nrow(custom_settings) == 1)
 
-    spider <- data.frame(type = "spider", name = name)
     spider$start_urls <- list(start_urls)
-    if (length(allowed_domains) > 0)
+
+    if (missing(allowed_domains)) {
+        allowed_domains <- NA
+    } else {
+        stopifnot(is.character(allowed_domains) && is.vector(allowed_domains))
         spider$allowed_domains <- list(allowed_domains)
-    if (length(custom_settings) > 0)
+    }
+    if (missing(custom_settings)) {
+        custom_settings <- NA
+    } else {
+        stopifnot(is.data.frame(custom_settings) && nrow(custom_settings) == 1)
         spider$custom_settings <- custom_settings
+    }
 
     json <- gen_json(spider)
     write_json(json)
@@ -93,14 +96,12 @@ create_spider <- function(name, start_urls, callback, allowed_domains, custom_se
 
 #' Send a message to close the spider
 #'
-#' @return the json message sent to stdout
 #' @export
 close_spider <- function() {
     msg <- data.frame(type = "close")
 
     json <- gen_json(msg)
     write_json(json)
-    return(json)
 }
 
 #' Runs the spider
@@ -175,13 +176,13 @@ send_request <- function(url, callback, base64, method, meta, body, headers, coo
     if (missing(headers)) {
         headers <- NA
     } else {
-        stopifnot(is.data.frame(headers) && length(headers) == 1)
+        stopifnot(is.data.frame(headers) && nrow(headers) == 1)
         request$headers <- headers
     }
     if (missing(cookies)) {
         cookies <- NA
     } else {
-        stopifnot(is.data.frame(cookies))
+        stopifnot(is.data.frame(cookies) && nrow(cookies) == 1)
         request$cookies <- cookies
     }
     if (missing(encoding)) {

@@ -28,8 +28,8 @@ parse <- function(response) {
 
 create_spider(name = "sample",
               start_urls = "http://example.com",
-              allowed_domains = c("example.com", "dmoz.org"),
               callback = parse,
+              allowed_domains = c("example.com", "dmoz.org"),
               custom_settings = data.frame("SOME_SETTING" = "some value"))
 
 }
