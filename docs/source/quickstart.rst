@@ -1,3 +1,5 @@
+.. _quickstart:
+
 Quickstart - Dmoz Streaming Spider
 ==================================
 
