@@ -78,7 +78,7 @@ create_spider <- function(name, start_urls, callback, allowed_domains, custom_se
     if (missing(custom_settings))
         custom_settings = c()
     else
-        stopifnot(is.data.frame(custom_settings))
+        stopifnot(is.data.frame(custom_settings) && nrow(custom_settings) == 1)
 
     spider <- data.frame(type = "spider", name = name)
     spider$start_urls <- list(start_urls)
@@ -163,7 +163,7 @@ send_request <- function(url, callback, base64, method, meta, body, headers, coo
     if (missing(meta)) {
         meta <- NA
     } else {
-        stopifnot(is.data.frame(meta))
+        stopifnot(is.data.frame(meta) && nrow(meta) == 1)
         request$meta <- meta
     }
     if (missing(body)) {
@@ -175,7 +175,7 @@ send_request <- function(url, callback, base64, method, meta, body, headers, coo
     if (missing(headers)) {
         headers <- NA
     } else {
-        stopifnot(is.data.frame(headers))
+        stopifnot(is.data.frame(headers) && length(headers) == 1)
         request$headers <- headers
     }
     if (missing(cookies)) {
@@ -246,7 +246,7 @@ send_from_response_request <- function(url, callback, from_response_request, bas
 
     stopifnot(is.character(url) && length(url) == 1)
     stopifnot(is.function(callback))
-    stopifnot(is.data.frame(from_response_request))
+    stopifnot(is.data.frame(from_response_request) && nrow(from_response_request) == 1)
     request$url <- url
     request$id <- as.character(streaming.env$request_id)
     request$from_response_request <- from_response_request
@@ -273,7 +273,7 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     if (missing(meta)) {
         meta <- NA
     } else {
-        stopifnot(is.data.frame(meta))
+        stopifnot(is.data.frame(meta) && nrow(meta) == 1)
         request$meta <- meta
     }
     if (missing(body)) {
@@ -285,13 +285,13 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     if (missing(headers)) {
         headers <- NA
     } else {
-        stopifnot(is.data.frame(headers))
+        stopifnot(is.data.frame(headers) && nrow(headers) == 1)
         request$headers <- headers
     }
     if (missing(cookies)) {
         cookies <- NA
     } else {
-        stopifnot(is.data.frame(cookies))
+        stopifnot(is.data.frame(cookies) && nrow(headers) == 1)
         request$cookies <- cookies
     }
     if (missing(encoding)) {
@@ -321,13 +321,13 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     if (!is.null(from_response_request$method))
         stopifnot(is.character(from_response_request$method) && length(from_response_request$method) == 1)
     if (!is.null(from_response_request$meta))
-        stopifnot(is.data.frame(from_response_request$meta))
+        stopifnot(is.data.frame(from_response_request$meta) && nrow(from_response_request$meta) == 1)
     if (!is.null(from_response_request$body))
         stopifnot(is.character(from_response_request$body) && length(from_response_request$body) == 1)
     if (!is.null(from_response_request$headers))
-        stopifnot(is.data.frame(from_response_request$headers))
+        stopifnot(is.data.frame(from_response_request$headers) && nrow(from_response_request$headers) == 1)
     if (!is.null(from_response_request$cookies))
-        stopifnot(is.data.frame(from_response_request$cookies))
+        stopifnot(is.data.frame(from_response_request$cookies) && nrow(from_response_request$cookies) == 1)
     if (!is.null(from_response_request$encoding))
         stopifnot(is.character(from_response_request$encoding) && length(from_response_request$encoding) == 1)
     if (!is.null(from_response_request$priority))
@@ -345,9 +345,9 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     if (!is.null(from_response_request$formnumber))
         stopifnot(is.character(from_response_request$formnumber) && length(from_response_request$formnumber) == 1)
     if (!is.null(from_response_request$formdata))
-        stopifnot(is.data.frame(from_response_request$formdata))
+        stopifnot(is.data.frame(from_response_request$formdata) && nrow(from_response_request$formdata) == 1)
     if (!is.null(from_response_request$clickdata))
-        stopifnot(is.data.frame(from_response_request$clickdata))
+        stopifnot(is.data.frame(from_response_request$clickdata) && nrow(from_response_request$clickdata) == 1)
     if (!is.null(from_response_request$dont_click))
         stopifnot(is.logical(from_response_request$dont_click) && length(from_response_request$dont_click) == 1)
 
