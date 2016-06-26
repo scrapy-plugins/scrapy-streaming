@@ -77,7 +77,7 @@ class RequestMessage(MessageValidator):
 
 class Form(MessageValidator):
     validator = {'formname': six.string_types, 'formxpath': six.string_types,
-                 'formcss': six.string_types, 'formnumber': six.string_types,
+                 'formcss': six.string_types, 'formnumber': int,
                  'formdata': dict, 'clickdata': dict, 'dont_click': bool,
                  # request fields
                  'method': six.string_types, 'meta': dict, 'body': six.string_types,
