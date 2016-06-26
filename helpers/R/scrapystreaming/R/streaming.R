@@ -318,6 +318,14 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     # from_response_request validation
     ##################################
 
+    allowed_fields <- c("base64", "method", "meta", "body", "headers", "cookies", "encoding", "priority", "dont_filter", "formname",
+                        "formxpath", "formcss", "formnumber", "formdata", "clickdata", "dont_click")
+    for (name in colnames(from_response_request)) {
+        if (!is.element(name, allowed_fields)) {
+            stop(paste(name, "is not a valid from_response_request parameter"))
+        }
+    }
+
     # request
     if (!is.null(from_response_request$method))
         stopifnot(is.character(from_response_request$method) && length(from_response_request$method) == 1)

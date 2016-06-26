@@ -194,4 +194,9 @@ test_that("send_from_response_request validate all parameters", {
     expect_error(send_from_response_request("http://example.com", callback, data))
     data$dont_click <- TRUE
     expect_output(send_from_response_request("http://example.com", callback, data))
+
+    # wrong parameters
+    data <- data.frame(x = character(1))
+    data$x <- 1
+    expect_error(send_from_response_request("http://example.com", callback, data), "x is not a valid from_response_request parameter")
 })
