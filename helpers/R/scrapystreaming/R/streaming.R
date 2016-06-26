@@ -292,7 +292,7 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     if (missing(cookies)) {
         cookies <- NA
     } else {
-        stopifnot(is.data.frame(cookies) && nrow(headers) == 1)
+        stopifnot(is.data.frame(cookies) && nrow(cookies) == 1)
         request$cookies <- cookies
     }
     if (missing(encoding)) {
@@ -344,7 +344,7 @@ send_from_response_request <- function(url, callback, from_response_request, bas
     if (!is.null(from_response_request$formcss))
         stopifnot(is.character(from_response_request$formcss) && length(from_response_request$formcss) == 1)
     if (!is.null(from_response_request$formnumber))
-        stopifnot(is.character(from_response_request$formnumber) && length(from_response_request$formnumber) == 1)
+        stopifnot(is.numeric(from_response_request$formnumber) && length(from_response_request$formnumber) == 1)
     if (!is.null(from_response_request$formdata))
         stopifnot(is.data.frame(from_response_request$formdata) && nrow(from_response_request$formdata) == 1)
     if (!is.null(from_response_request$clickdata))
