@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class SpiderTest extends BaseStd {
 
     @Test
-    public void start() {
+    public void start() throws Exception {
         final ArrayList<String> urls = new ArrayList<String>(0);
         urls.add("http://example.com");
         urls.add("http://test.com");
@@ -51,7 +51,7 @@ public class SpiderTest extends BaseStd {
     }
 
     @Test
-    public void close() {
+    public void close() throws Exception {
         class TestSpider extends Spider{
             public void parse(ResponseMessage response) {}
         }
