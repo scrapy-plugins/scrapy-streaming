@@ -3,6 +3,7 @@ package org.scrapy.scrapystreaming;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.scrapy.scrapystreaming.core.SpiderException;
 import org.scrapy.scrapystreaming.messages.LogMessage;
 
 
@@ -10,7 +11,7 @@ import org.scrapy.scrapystreaming.messages.LogMessage;
 public class LoggerTest extends BaseStd {
 
     @Test
-    public void log() {
+    public void log() throws SpiderException {
         for (Logger.LEVEL level: Logger.LEVEL.values()) {
             Logger.log("message", level);
 

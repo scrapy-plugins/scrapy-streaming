@@ -10,6 +10,20 @@ import org.scrapy.scrapystreaming.messages.SpiderMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+class TestSpider extends Spider {
+
+    TestSpider(ArrayList<String> urls, ArrayList<String> domains, HashMap<String, String> settings) {
+        name = "test";
+        start_urls = urls;
+        allowed_domains = domains;
+        custom_settings = settings;
+    }
+
+    public void parse(ResponseMessage response) {
+
+    }
+}
+
 public class SpiderTest extends BaseStd {
 
     @Test
@@ -25,22 +39,14 @@ public class SpiderTest extends BaseStd {
         settings.put("setting 2", "value");
         settings.put("setting 3", "value");
 
-        class TestSpider extends Spider {
+        new TestSpider(urls, domains, settings).start();
 
-            TestSpider() {
-                name = "test";
-                start_urls = urls;
-                allowed_domains = domains;
-                custom_settings = settings;
-            }
-
-            public void parse(ResponseMessage response) {
-
-            }
-        }
-        new TestSpider().start();
         SpiderMessage spider = gson.fromJson(out.toString(), SpiderMessage.class);
-        SpiderMessage spiderExpected = new SpiderMessage("test", urls, domains, settings);
+        SpiderMessage spiderExpected = new SpiderMessage();
+        spiderExpected.name = "test";
+        spiderExpected.start_urls = urls;
+        spiderExpected.allowed_domains = domains;
+        spiderExpected.custom_settings = settings;
 
         Assert.assertEquals(spiderExpected, spider);
 

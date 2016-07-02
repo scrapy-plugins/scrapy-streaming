@@ -2,34 +2,30 @@ package org.scrapy.scrapystreaming;
 
 import org.scrapy.scrapystreaming.core.CommunicationProtocol;
 import org.scrapy.scrapystreaming.messages.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import org.scrapy.scrapystreaming.core.SpiderException;
 
 
-public abstract class Spider {
-    public String name = "ExternalSpider";
-    public List<String> start_urls = new ArrayList<String>(0);
-    public List<String> allowed_domains;
-    public HashMap<String, String> custom_settings;
-    protected boolean isRunning = false;
-    protected CommunicationProtocol protocol;
-
+public abstract class Spider extends SpiderMessage {
+    protected transient boolean isRunning = false;
+    protected transient CommunicationProtocol protocol;
 
     public final void start() throws Exception {
         if (isRunning)
             throw new Exception("Spider already running");
 
-        new SpiderMessage(name, start_urls, allowed_domains, custom_settings).sendMessage();
-        protocol = new CommunicationProtocol();
+        sendMessage();
+        protocol = new CommunicationProtocol(this);
         protocol.start();
 
         isRunning = true;
     }
 
     public void close() {
-        new CloseMessage().sendMessage();
+        try {
+            new CloseMessage().sendMessage();
+        } catch (SpiderException e) {
+            e.printStackTrace();
+        }
     }
 
     public abstract void parse(ResponseMessage response);
