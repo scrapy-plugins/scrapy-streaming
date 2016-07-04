@@ -47,6 +47,8 @@ public class CommunicationProtocol extends Thread {
         } else if (msg.type.equals("error")) {
             ErrorMessage error = Utils.gson.fromJson(line, ErrorMessage.class);
             onError(error);
+        } else {
+            throw new SpiderException("Invalid message type: " + msg.type);
         }
     }
 
@@ -64,11 +66,12 @@ public class CommunicationProtocol extends Thread {
         }
     }
 
-    protected void onException(ExceptionMessage exception) {
-
+    protected void onException(ExceptionMessage exception) throws SpiderException {
+        spider.onException(exception);
     }
 
-    protected void onError(ErrorMessage error) {
-
+    protected void onError(ErrorMessage error) throws SpiderException {
+        throw new SpiderException("Spider error. Message sent: " + error.received_message +
+                "; Error details: " + error.details);
     }
 }

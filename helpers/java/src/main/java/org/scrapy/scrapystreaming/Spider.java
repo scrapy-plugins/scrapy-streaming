@@ -9,9 +9,9 @@ public abstract class Spider extends SpiderMessage {
     protected transient boolean isRunning = false;
     protected transient CommunicationProtocol protocol;
 
-    public final void start() throws Exception {
+    public final void start() throws SpiderException {
         if (isRunning)
-            throw new Exception("Spider already running");
+            throw new SpiderException("Spider already running");
 
         sendMessage();
         protocol = new CommunicationProtocol(this);
@@ -30,15 +30,9 @@ public abstract class Spider extends SpiderMessage {
 
     public abstract void parse(ResponseMessage response);
 
-}
-
-class Teste extends Spider {
-
-    public void parse(ResponseMessage response) {
-
+    public void onException(ExceptionMessage exception) throws SpiderException {
+        throw new SpiderException("Scrapy raised an exception. Message sent: " + exception.received_message +
+                "; Exception message: " + exception.exception);
     }
 
-    public static void main (String args[]) throws Exception {
-        new Teste().start();
-    }
 }

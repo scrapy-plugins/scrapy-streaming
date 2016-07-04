@@ -3,6 +3,7 @@ package org.scrapy.scrapystreaming;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.scrapy.scrapystreaming.core.SpiderException;
 import org.scrapy.scrapystreaming.messages.CloseMessage;
 import org.scrapy.scrapystreaming.messages.ResponseMessage;
 import org.scrapy.scrapystreaming.messages.SpiderMessage;
@@ -39,6 +40,7 @@ public class SpiderTest extends BaseStd {
         settings.put("setting 2", "value");
         settings.put("setting 3", "value");
 
+        // creates spider
         new TestSpider(urls, domains, settings).start();
 
         SpiderMessage spider = gson.fromJson(out.toString(), SpiderMessage.class);
@@ -54,6 +56,13 @@ public class SpiderTest extends BaseStd {
                       "\"http://test.com\"],\"allowed_domains\":[\"example.com\",\"test.com\"]," +
                       "\"custom_settings\":{\"setting 1\":\"value\",\"setting 2\":\"value\",\"setting 3\":\"value\"}}";
         Assert.assertEquals(json.trim(), out.toString().trim());
+    }
+
+    @Test(expected = SpiderException.class)
+    public void startRunsOnce() throws SpiderException{
+        TestSpider s = new TestSpider(new ArrayList<String>(), null, null);
+        s.start();
+        s.start();
     }
 
     @Test
