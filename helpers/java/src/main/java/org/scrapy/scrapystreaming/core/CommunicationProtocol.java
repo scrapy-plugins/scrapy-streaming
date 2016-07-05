@@ -35,8 +35,8 @@ public class CommunicationProtocol extends Thread {
     }
 
     protected void messageReceived(ReceivedMessage msg, String line) throws SpiderException {
-        if (msg.type.equals("status")) {
-            StatusMessage status = Utils.gson.fromJson(line, StatusMessage.class);
+        if (msg.type.equals("ready")) {
+            ReadyMessage status = Utils.gson.fromJson(line, ReadyMessage.class);
             onStatus(status);
         } else if (msg.type.equals("response")) {
             ResponseMessage response = Utils.gson.fromJson(line, ResponseMessage.class);
@@ -52,7 +52,7 @@ public class CommunicationProtocol extends Thread {
         }
     }
 
-    protected void onStatus(StatusMessage status) throws SpiderException {
+    protected void onStatus(ReadyMessage status) throws SpiderException {
         if (!status.status.equals("ready")) {
             throw new SpiderException("There is a problem in the communication channel. Received status: " + status.status);
         }
