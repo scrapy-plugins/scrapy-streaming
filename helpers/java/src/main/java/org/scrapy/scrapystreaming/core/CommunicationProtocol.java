@@ -5,9 +5,7 @@ import org.scrapy.scrapystreaming.Spider;
 import org.scrapy.scrapystreaming.messages.*;
 import org.scrapy.scrapystreaming.utils.Utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class CommunicationProtocol extends Thread {
     BufferedReader in;
@@ -23,9 +21,11 @@ public class CommunicationProtocol extends Thread {
         while (true) {
             try {
                 String line = in.readLine();
-                ReceivedMessage msg = Utils.gson.fromJson(line, ReceivedMessage.class);
-
-                messageReceived(msg, line);
+                line = line.trim();
+                if (line.length() > 0) {
+                    ReceivedMessage msg = Utils.gson.fromJson(line, ReceivedMessage.class);
+                    messageReceived(msg, line);
+                }
             } catch (IOException e) {
                 System.err.println("There is a problem in the communication channel: " + e.getMessage());
             } catch (SpiderException e) {

@@ -1,5 +1,6 @@
 package org.scrapy.scrapystreaming;
 
+import org.scrapy.scrapystreaming.core.Callback;
 import org.scrapy.scrapystreaming.core.CommunicationProtocol;
 import org.scrapy.scrapystreaming.messages.*;
 import org.scrapy.scrapystreaming.core.SpiderException;

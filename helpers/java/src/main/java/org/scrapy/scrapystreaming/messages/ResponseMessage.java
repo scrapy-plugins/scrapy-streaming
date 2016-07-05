@@ -8,7 +8,7 @@ public class ResponseMessage extends Message {
     public final String type = "response";
     public String id;
     public String url;
-    public HashMap<String, String> headers;
+    public HashMap<String, List<String>> headers;
     public Integer status;
     public String body;
     public HashMap<String, String> meta;
