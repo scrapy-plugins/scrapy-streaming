@@ -17,17 +17,20 @@ public class Logger {
      * Print a log message in the scrapy streaming logger
      * @param message message
      * @param level log level
-     * @throws SpiderException
      */
-    public static void log(String message, LEVEL level) throws SpiderException {
-        new LogMessage(message, level.name()).sendMessage();
+    public static void log(String message, LEVEL level) {
+        try {
+            new LogMessage(message, level.name()).sendMessage();
+        } catch (SpiderException e) {
+            // logger doesn't validate data
+        }
     }
 
     /**
      * Print a critical message in the scrapy streaming logger
      * @param message message
      **/
-    public static void logCritical(String message) throws SpiderException {
+    public static void critical(String message) {
         log(message, LEVEL.CRITICAL);
     }
 
@@ -35,7 +38,7 @@ public class Logger {
      * Print a error message in the scrapy streaming logger
      * @param message message
      **/
-    public static void logError(String message) throws SpiderException {
+    public static void error(String message) {
         log(message, LEVEL.ERROR);
     }
 
@@ -43,7 +46,7 @@ public class Logger {
      * Print a warning in the scrapy streaming logger
      * @param message message
      **/
-    public static void logWarning(String message) throws SpiderException {
+    public static void warning(String message) {
         log(message, LEVEL.WARNING);
     }
 
@@ -51,7 +54,7 @@ public class Logger {
      * Print a info message in the scrapy streaming logger
      * @param message message
      **/
-    public static void logInfo(String message) throws SpiderException {
+    public static void info(String message) {
         log(message, LEVEL.INFO);
     }
 
@@ -59,7 +62,7 @@ public class Logger {
      * Print a debug message in the scrapy streaming logger
      * @param message message
      **/
-    public static void logDebug(String message) throws SpiderException {
+    public static void debug(String message) {
         log(message, LEVEL.DEBUG);
     }
 }

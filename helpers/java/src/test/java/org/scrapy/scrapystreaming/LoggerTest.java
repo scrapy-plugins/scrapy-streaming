@@ -25,7 +25,7 @@ public class LoggerTest extends BaseStd {
 
     @Test
     public void logCritical() throws Exception {
-        Logger.logCritical("critical");
+        Logger.critical("critical");
 
         LogMessage logMessage = gson.fromJson(out.toString(), LogMessage.class);
         LogMessage logExpected = new LogMessage("critical", Logger.LEVEL.CRITICAL.name());
@@ -35,7 +35,7 @@ public class LoggerTest extends BaseStd {
 
     @Test
     public void logError() throws Exception {
-        Logger.logError("error");
+        Logger.error("error");
 
         LogMessage logMessage = gson.fromJson(out.toString(), LogMessage.class);
         LogMessage logExpected = new LogMessage("error", Logger.LEVEL.ERROR.name());
@@ -45,7 +45,7 @@ public class LoggerTest extends BaseStd {
 
     @Test
     public void logWarning() throws Exception {
-        Logger.logWarning("warn");
+        Logger.warning("warn");
 
         LogMessage logMessage = gson.fromJson(out.toString(), LogMessage.class);
         LogMessage logExpected = new LogMessage("warn", Logger.LEVEL.WARNING.name());
@@ -55,7 +55,7 @@ public class LoggerTest extends BaseStd {
 
     @Test
     public void logInfo() throws Exception {
-        Logger.logInfo("info");
+        Logger.info("info");
 
         LogMessage logMessage = gson.fromJson(out.toString(), LogMessage.class);
         LogMessage logExpected = new LogMessage("info", Logger.LEVEL.INFO.name());
@@ -65,7 +65,7 @@ public class LoggerTest extends BaseStd {
 
     @Test
     public void logDebug() throws Exception {
-        Logger.logDebug("debug");
+        Logger.debug("debug");
 
         LogMessage logMessage = gson.fromJson(out.toString(), LogMessage.class);
         LogMessage logExpected = new LogMessage("debug", Logger.LEVEL.DEBUG.name());
