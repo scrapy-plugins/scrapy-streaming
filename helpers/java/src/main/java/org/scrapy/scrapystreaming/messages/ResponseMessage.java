@@ -1,17 +1,17 @@
 package org.scrapy.scrapystreaming.messages;
 
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ResponseMessage extends Message {
     public final String type = "response";
     public String id;
     public String url;
-    public HashMap<String, List<String>> headers;
+    public Map headers;
     public Integer status;
     public String body;
-    public HashMap<String, String> meta;
+    public Map meta;
     public List<String> flags;
 
     public List<String> validator() {
