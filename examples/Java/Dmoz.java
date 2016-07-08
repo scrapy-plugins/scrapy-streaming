@@ -38,7 +38,7 @@ public class Dmoz extends Spider {
             try {
                 Request r = new Request("http://www.dmoz.org" + el.attr("href"));
                 r.open(new Callback() {
-                    public void onResponse(ResponseMessage response) {
+                    public void parse(ResponseMessage response) {
                         parseSubcat(response);
                     }
                 });

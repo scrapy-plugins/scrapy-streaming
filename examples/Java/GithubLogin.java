@@ -36,7 +36,7 @@ public class GithubLogin extends Spider {
         // open the request
         FromResponseRequest req = new FromResponseRequest("https://github.com/login", data);
         req.open(new Callback() {
-            public void onResponse(ResponseMessage response) {
+            public void parse(ResponseMessage response) {
 
                 // validate if the loggin was correct or not
                 if (response.body.contains("Incorrect username or password")) {

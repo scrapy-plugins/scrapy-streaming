@@ -38,7 +38,7 @@ public class CheckStatus extends Spider {
             responsesRemaining++;
 
             r.open(new Callback() {
-                public void onResponse(ResponseMessage response) {
+                public void parse(ResponseMessage response) {
                     // if got a response, the domain is working.
                     Logger.debug(response.url + " is working");
                     responsesRemaining--;

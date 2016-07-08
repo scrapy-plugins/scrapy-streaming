@@ -37,7 +37,7 @@ public class Github extends Spider {
             try {
                 Request r = new Request("https://github.com" + el.attr("href"));
                 r.open(new Callback() {
-                    public void onResponse(ResponseMessage response) {
+                    public void parse(ResponseMessage response) {
                         parseRepo(response);
                     }
                 });

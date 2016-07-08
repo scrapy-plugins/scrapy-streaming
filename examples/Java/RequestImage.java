@@ -33,7 +33,7 @@ public class RequestImage extends Spider {
         r.base64 = true;
 
         r.open(new Callback() {
-            public void onResponse(ResponseMessage response) {
+            public void parse(ResponseMessage response) {
                 try {
                     // write the response body to a file and close the spider
                     byte data[] = Base64.decodeBase64(response.body);
