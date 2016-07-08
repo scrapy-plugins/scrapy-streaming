@@ -260,7 +260,7 @@ You can define it as follows:
             *"formname": string,
             *"formxpath": string,
             *"formcss": string,
-            *"formnumber": string,
+            *"formnumber": int,
             *"formdata": object,
             *"clickdata": object,
             *"dont_click": boolean

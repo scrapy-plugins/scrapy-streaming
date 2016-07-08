@@ -15,7 +15,7 @@ Spider Behavior
 ---------------
 
 If you are not familiar with Scrapy, we name Spider as an object that defines how scrapy should scrape
-information from a domain (or a group of domains). It contains the all the logic and necessary information to
+information from a domain (or a group of domains). It contains all the logic and necessary information to
 extract the data from a website.
 
 We'll define a simple spider, that works as follows:

@@ -1,5 +1,7 @@
 R Package
 =========
+.. currentmodule:: R
+
 
 .. todo:: publish it and add the link to cran package with the package docs here
 
@@ -31,20 +33,19 @@ jsonlite
 
 We focus our attention to two jsonlite's commands:
 
-* :command:`toJSON`
-* :command:`fromJSON`
-
-.. command:: toJSON
+* :meth:`toJSON`
+* :meth:`fromJSON`
 
 These commands may be helpful in the spider development.
 
 You can read the jsonlite's quickstart here: https://cran.r-project.org/web/packages/jsonlite/vignettes/json-aaquickstart.html
 and a more detailed documentation here: http://arxiv.org/abs/1403.2805
 
-toJSON
-~~~~~~
 
-The :command:`toJSON` allows you to convert a R object to JSON, and can be used as follows:
+.. method:: toJSON(x, dataframe = c("rows", "columns", "values"), matrix = c("rowmajor", "columnmajor"), Date = c("ISO8601", "epoch"), POSIXt = c("string", "ISO8601", "epoch", "mongo"), factor = c("string", "integer"), complex = c("string", "list"), raw = c("base64", "hex", "mongo"), null = c("list", "null"), na = c("null", "string"), auto_unbox = FALSE, digits = 4, pretty = FALSE, force = FALSE, ...)
+
+
+The :meth:`toJSON` allows you to convert a R object to JSON, and can be used as follows:
 
 .. code-block:: R
 
@@ -58,11 +59,9 @@ The :command:`toJSON` allows you to convert a R object to JSON, and can be used 
     > toJSON(data)
     [{"login":"ok","attempts":2,"input":{"user":"admin","pass":"secret"}}]
 
-.. command:: fromJSON
+.. method:: fromJSON(txt, simplifyVector = TRUE, simplifyDataFrame = simplifyVector, simplifyMatrix = simplifyVector, flatten = FALSE, ...)
 
-fromJSON
-~~~~~~~~
-You can use the :command:`fromJSON` command to converts a json string to a R object again.
+You can use the :meth:`fromJSON` command to converts a json string to a R object again.
 
 .. code-block:: R
 
@@ -73,7 +72,6 @@ You can use the :command:`fromJSON` command to converts a json string to a R obj
 scrapystreaming
 ---------------
 
-.. currentmodule:: R
 
 The ``scrapystreaming`` R package provide the following commands:
 
