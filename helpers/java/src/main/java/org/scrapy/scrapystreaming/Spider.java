@@ -5,13 +5,23 @@ import org.scrapy.scrapystreaming.core.CommunicationProtocol;
 import org.scrapy.scrapystreaming.messages.*;
 import org.scrapy.scrapystreaming.core.SpiderException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 
 /**
  * This class lets you create the External Spider and run / stop it.
  */
-public abstract class Spider extends SpiderMessage {
-    private transient boolean isRunning = false;
-    private transient CommunicationProtocol protocol;
+public abstract class Spider {
+    public String name = "ExternalSpider";
+    public List<String> start_urls = new ArrayList<String>(0);
+    public List<String> allowed_domains;
+    public HashMap<String, String> custom_settings;
+
+    private SpiderMessage spiderMessage;
+    private boolean isRunning = false;
+    private CommunicationProtocol protocol;
 
     /**
      * Start the Spider execution
@@ -21,7 +31,13 @@ public abstract class Spider extends SpiderMessage {
         if (isRunning)
             throw new SpiderException("Spider already running");
 
-        sendMessage();
+        spiderMessage = new SpiderMessage();
+        spiderMessage.name = name;
+        spiderMessage.start_urls = start_urls;
+        spiderMessage.allowed_domains = allowed_domains;
+        spiderMessage.custom_settings = custom_settings;
+        spiderMessage.sendMessage();
+
         protocol = new CommunicationProtocol(this);
         protocol.start();
 
