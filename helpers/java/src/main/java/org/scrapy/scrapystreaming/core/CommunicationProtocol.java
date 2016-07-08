@@ -62,7 +62,7 @@ public class CommunicationProtocol extends Thread {
         if (response.id.equals("parse")) {
             spider.parse(response);
         } else {
-            Utils.responseMapping.get(response.id).onResponse(response);
+            Utils.responseMapping.get(response.id).parse(response);
         }
     }
 

@@ -18,7 +18,7 @@ public class FromResponseRequestTest extends BaseStd {
 
         r.open(new Callback() {
             @Override
-            public void onResponse(ResponseMessage response) {
+            public void parse(ResponseMessage response) {
                 //
             }
         });
@@ -34,7 +34,7 @@ public class FromResponseRequestTest extends BaseStd {
 
         r.open(new Callback() {
             @Override
-            public void onResponse(ResponseMessage response) {
+            public void parse(ResponseMessage response) {
                 //
             }
         });

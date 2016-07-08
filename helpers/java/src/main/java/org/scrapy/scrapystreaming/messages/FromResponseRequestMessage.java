@@ -4,6 +4,7 @@ package org.scrapy.scrapystreaming.messages;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class FromResponseRequestMessage extends Message {
@@ -12,10 +13,10 @@ public class FromResponseRequestMessage extends Message {
     public String url;
     public Boolean base64;
     public String method;
-    public HashMap<String, String> meta;
+    public Map meta;
     public String body;
-    public HashMap<String, String> headers;
-    public HashMap<String, String> cookies;
+    public Map headers;
+    public Map cookies;
     public String encoding;
     public Integer priority;
     public Boolean dont_filter;

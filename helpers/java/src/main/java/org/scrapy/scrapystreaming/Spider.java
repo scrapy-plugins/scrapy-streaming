@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * This class lets you create the External Spider and run / stop it.
  */
-public abstract class Spider {
+public abstract class Spider implements Callback {
     public String name = "ExternalSpider";
     public List<String> start_urls = new ArrayList<String>(0);
     public List<String> allowed_domains;
@@ -25,6 +25,7 @@ public abstract class Spider {
 
     /**
      * Start the Spider execution
+     *
      * @throws SpiderException
      */
     public final void start() throws SpiderException {
@@ -58,6 +59,7 @@ public abstract class Spider {
 
     /**
      * The callback of initial_urls responses.
+     *
      * @param response response data
      */
     public abstract void parse(ResponseMessage response);
@@ -65,6 +67,7 @@ public abstract class Spider {
     /**
      * This method is called when Scrapy raises an exception and sends the exception message.
      * If you want to analyze the exception, or just ignore the problem, override this function.
+     *
      * @param exception exception message sent by Scrapy Streaming
      * @throws SpiderException
      */
