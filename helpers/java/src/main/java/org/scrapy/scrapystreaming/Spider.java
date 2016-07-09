@@ -6,8 +6,8 @@ import org.scrapy.scrapystreaming.messages.*;
 import org.scrapy.scrapystreaming.core.SpiderException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -17,7 +17,7 @@ public abstract class Spider implements Callback {
     public String name = "ExternalSpider";
     public List<String> start_urls = new ArrayList<String>(0);
     public List<String> allowed_domains;
-    public HashMap<String, String> custom_settings;
+    public Map custom_settings;
 
     private SpiderMessage spiderMessage;
     private boolean isRunning = false;
