@@ -1,0 +1,29 @@
+{
+  "name": "scrapystreaming",
+  "version": "0.1.0",
+  "description": "Node.js Scrapy Streaming",
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:scrapy-plugins/scrapy-streaming.git"
+  },
+  "keywords": [
+    "scrapy"
+  ],
+  "author": "Aron Bordin",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/scrapy-plugins/scrapy-streaming/issues"
+  },
+  "homepage": "https://github.com/scrapy-plugins/scrapy-streaming#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  },
+  "dependencies": {
+    "split": "^1.0.0"
+  }
+}
