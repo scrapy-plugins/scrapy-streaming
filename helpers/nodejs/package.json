@@ -4,7 +4,9 @@
   "description": "Node.js Scrapy Streaming",
   "main": "index.js",
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "lint": "make lint",
+    "check": "make check"
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,7 @@
   "homepage": "https://github.com/scrapy-plugins/scrapy-streaming#readme",
   "devDependencies": {
     "chai": "^3.5.0",
+    "eslint": "^3.0.1",
     "mocha": "^2.5.3"
   },
   "dependencies": {
