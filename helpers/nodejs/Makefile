@@ -1,10 +1,12 @@
+requirements:
+	npm install
 
-test:
+test: requirements
 	./node_modules/.bin/mocha --reporter spec
 
-lint:
+lint: requirements
 	./node_modules/eslint/bin/eslint.js *.js
 
 check: test lint
 
-.PHONY: test
+.PHONY:	requirements test lint check
