@@ -45,9 +45,9 @@ var spider = module.exports = {
         var msg = {
             type: 'spider',
             name: name,
-            startUrls: startUrls,
-            allowedDomains: allowedDomains,
-            customSettings: customSettings
+            start_urls: startUrls,
+            allowed_domains: allowedDomains,
+            custom_settings: customSettings
         };
 
         return writeJson(msg);
@@ -116,8 +116,8 @@ var spider = module.exports = {
         _isDefined(callback, 'callback');
 
         // validation
-        url && _validateType(url, 'string', 'url');
-        callback && _validateType(callback, 'function', 'callback');
+        _validateType(url, 'string', 'url');
+        _validateType(callback, 'function', 'callback');
         base64 && _validateType(base64, 'boolean', 'base64');
         method && _validateType(method, 'string', 'method');
         meta && _validateType(meta, 'object', 'meta');
@@ -142,7 +142,7 @@ var spider = module.exports = {
             cookies: cookies,
             encoding: encoding,
             priority: priority,
-            dontFilter: dontFilter
+            dont_filter: dontFilter
         };
 
         this._requestId++;
@@ -150,9 +150,88 @@ var spider = module.exports = {
         return writeJson(msg);
     },
 
-    sendFromResponseRequest: function() {
+    /**
+     * Opens a new request
+     *
+     * @param  {string}   url        request url
+     * @param  {Function} callback   response callback
+     * @param  {fromResponseRequest} Creates a new request using the response
+     * @param  {boolean}  base64     if true, converts the response body to base64. (optional)
+     * @param  {string}   method     request method (optional)
+     * @param  {object}   meta       request extra data (optional)
+     * @param  {string}   body       request body (optional)
+     * @param  {object}   headers    request headers (optional)
+     * @param  {object}   cookies    rqeuest extra cookies (optional)
+     * @param  {string}   encoding   default encoding (optional)
+     * @param  {int}      priority   request priority  (optional)
+     * @param  {boolean}   dontFilter if true, the request don't pass on the request duplicate filter (optional)
+     *
+     * @return {string}              json message written in the process stdout
+     */
+    sendFromResponseRequest: function(url, callback, fromResponseRequest, base64, method, meta, body, headers, cookies, encoding, priority, dontFilter) {
+        // required fields
+        _isDefined(url, 'url');
+        _isDefined(callback, 'callback');
+        _isDefined(fromResponseRequest, 'fromResponseRequest');
+
+        // validation - request
+        _validateType(url, 'string', 'url');
+        _validateType(callback, 'function', 'callback');
+        _validateType(fromResponseRequest, 'object', 'fromResponseRequest');
+        base64 && _validateType(base64, 'boolean', 'base64');
+        method && _validateType(method, 'string', 'method');
+        meta && _validateType(meta, 'object', 'meta');
+        body && _validateType(body, 'string', 'body');
+        headers && _validateType(headers, 'object', 'headers');
+        cookies && _validateType(cookies, 'object', 'cookies');
+        encoding && _validateType(encoding, 'string', 'encoding');
+        priority && _validateType(priority, 'number', 'priority');
+        dontFilter && _validateType(dontFilter, 'boolean', 'dontFilter');
+
+        // validation - fromResponseRequest
+
+        fromResponseRequest.url && _validateType(fromResponseRequest.url, 'string', 'fromResponseRequest.url');
+        fromResponseRequest.method && _validateType(fromResponseRequest.method, 'string', 'fromResponseRequest.method');
+        fromResponseRequest.meta && _validateType(fromResponseRequest.meta, 'object', 'fromResponseRequest.meta');
+        fromResponseRequest.body && _validateType(fromResponseRequest.body, 'string', 'fromResponseRequest.body');
+        fromResponseRequest.headers && _validateType(fromResponseRequest.headers, 'object', 'fromResponseRequest.headers');
+        fromResponseRequest.cookies && _validateType(fromResponseRequest.cookies, 'object', 'fromResponseRequest.cookies');
+        fromResponseRequest.encoding && _validateType(fromResponseRequest.encoding, 'string', 'fromResponseRequest.encoding');
+        fromResponseRequest.priority && _validateType(fromResponseRequest.priority, 'number', 'fromResponseRequest.priority');
+        fromResponseRequest.dontFilter && _validateType(fromResponseRequest.dontFilter, 'boolean', 'fromResponseRequest.dontFilter');
+
+        this.responseMapping[this._requestId] = callback;
+
+        var msg = {
+            type: 'request',
+            url: url,
+            id: this._requestId,
+            base64: base64,
+            method: method,
+            meta: meta,
+            body: body,
+            headers: headers,
+            cookies: cookies,
+            encoding: encoding,
+            priority: priority,
+            dont_filter: dontFilter
+        };
+
+        this._requestId++;
+
+        return writeJson(msg);
     },
 
+    /**
+     * Starts the spider execution. This will bind the process stdin to read data
+     * from Scrapy Streaming, and process each message received.
+     *
+     * If you want to handle the exceptions generated by Scrapy, pass a function that receives a single parameter as an argument.
+     *
+     * By default, any exception will stop the spider execution and throw an Error.
+     *
+     * @param  {Function} exceptionHandler function to handle exceptions. Must receive a single parameter, the received json with the exception. (optional)
+     */
     runSpider: function(exceptionHandler) {
         if (exceptionHandler !== undefined) {
             _validateType(exceptionHandler, 'function', 'exceptionHandler');
@@ -275,9 +354,3 @@ var _validateType = function(variable, expectedType, name) {
     }
     return true;
 };
-// TODO remove the following code
-
-// spider.runSpider();
-// spider.closeSpider();
-// spider.sendLog('hello', 'DEBUG');
-// spider.createSpider('aron', ['a'], function(){console.log(1);});
