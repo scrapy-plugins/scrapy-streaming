@@ -26,14 +26,21 @@ var spider = module.exports = {
         _validateType(callback, 'function', 'callback');
         customSettings && _validateType(customSettings, 'object', 'customSettings');
 
-        if (allowedDomains !== undefined) {
+        if (startUrls) {
             if (startUrls.constructor !== Array) {
                 throw new Error('startUrls parameter must be an array. Received: '
                                 + typeof startUrls);
             }
         }
 
-        if (customSettings !== undefined) {
+        if (allowedDomains) {
+            if (allowedDomains.constructor !== Array) {
+                throw new Error('allowedDomains parameter must be an array. Received: '
+                                + typeof allowedDomains);
+            }
+        }
+
+        if (customSettings) {
             if (allowedDomains.constructor !== Array) {
                 throw new Error('allowedDomains parameter must be an array. Received: '
                                 + typeof allowedDomains);
@@ -45,9 +52,9 @@ var spider = module.exports = {
         var msg = {
             type: 'spider',
             name: name,
-            start_urls: startUrls,
-            allowed_domains: allowedDomains,
-            custom_settings: customSettings
+            start_urls: startUrls || undefined,
+            allowed_domains: allowedDomains || undefined,
+            custom_settings: customSettings || undefined
         };
 
         return writeJson(msg);
@@ -71,8 +78,8 @@ var spider = module.exports = {
      */
     sendLog: function(message, level) {
         // required
-        _isDefined(message);
-        _isDefined(level);
+        _isDefined(message, 'message');
+        _isDefined(level, 'level');
         // validation
         _validateType(message, 'string', 'message');
         _validateType(level, 'string', 'level');
@@ -85,9 +92,9 @@ var spider = module.exports = {
         }
 
         var msg = {
-            'type': 'log',
-            'message': message,
-            'level': level
+            type: 'log',
+            message: message,
+            level: level
         };
 
         return writeJson(msg);
@@ -134,15 +141,15 @@ var spider = module.exports = {
             type: 'request',
             url: url,
             id: this._requestId,
-            base64: base64,
-            method: method,
-            meta: meta,
-            body: body,
-            headers: headers,
-            cookies: cookies,
-            encoding: encoding,
-            priority: priority,
-            dont_filter: dontFilter
+            base64: base64 || undefined,
+            method: method || undefined,
+            meta: meta || undefined,
+            body: body || undefined,
+            headers: headers || undefined,
+            cookies: cookies || undefined,
+            encoding: encoding || undefined,
+            priority: priority || undefined,
+            dont_filter: dontFilter || undefined
         };
 
         this._requestId++;
@@ -198,23 +205,32 @@ var spider = module.exports = {
         fromResponseRequest.cookies && _validateType(fromResponseRequest.cookies, 'object', 'fromResponseRequest.cookies');
         fromResponseRequest.encoding && _validateType(fromResponseRequest.encoding, 'string', 'fromResponseRequest.encoding');
         fromResponseRequest.priority && _validateType(fromResponseRequest.priority, 'number', 'fromResponseRequest.priority');
-        fromResponseRequest.dontFilter && _validateType(fromResponseRequest.dontFilter, 'boolean', 'fromResponseRequest.dontFilter');
+        fromResponseRequest.dont_filter && _validateType(fromResponseRequest.dont_filter, 'boolean', 'fromResponseRequest.dont_filter');
+
+        fromResponseRequest.formname && _validateType(fromResponseRequest.formname, 'string', 'fromResponseRequest.formname');
+        fromResponseRequest.formxpath && _validateType(fromResponseRequest.formxpath, 'string', 'fromResponseRequest.formxpath');
+        fromResponseRequest.formcss && _validateType(fromResponseRequest.formcss, 'string', 'fromResponseRequest.formcss');
+        fromResponseRequest.formnumber && _validateType(fromResponseRequest.formnumber, 'number', 'fromResponseRequest.formnumber');
+        fromResponseRequest.formdata && _validateType(fromResponseRequest.formdata, 'object', 'fromResponseRequest.formdata');
+        fromResponseRequest.clickdata && _validateType(fromResponseRequest.clickdata, 'object', 'fromResponseRequest.clickdata');
+        fromResponseRequest.dont_click && _validateType(fromResponseRequest.dont_click, 'boolean', 'fromResponseRequest.dont_click');
 
         this.responseMapping[this._requestId] = callback;
 
         var msg = {
-            type: 'request',
+            type: 'from_response_request',
             url: url,
             id: this._requestId,
-            base64: base64,
-            method: method,
-            meta: meta,
-            body: body,
-            headers: headers,
-            cookies: cookies,
-            encoding: encoding,
-            priority: priority,
-            dont_filter: dontFilter
+            from_response_request: fromResponseRequest,
+            base64: base64 || undefined,
+            method: method || undefined,
+            meta: meta || undefined,
+            body: body || undefined,
+            headers: headers || undefined,
+            cookies: cookies || undefined,
+            encoding: encoding || undefined,
+            priority: priority || undefined,
+            dont_filter: dontFilter || undefined
         };
 
         this._requestId++;
@@ -229,7 +245,6 @@ var spider = module.exports = {
      * If you want to handle the exceptions generated by Scrapy, pass a function that receives a single parameter as an argument.
      *
      * By default, any exception will stop the spider execution and throw an Error.
-     *
      * @param  {Function} exceptionHandler function to handle exceptions. Must receive a single parameter, the received json with the exception. (optional)
      */
     runSpider: function(exceptionHandler) {
