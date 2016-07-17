@@ -103,37 +103,41 @@ var spider = module.exports = {
     /**
      * Opens a new request
      *
-     * @param  {string}   url        request url
-     * @param  {Function} callback   response callback
-     * @param  {boolean}  base64     if true, converts the response body to base64. (optional)
-     * @param  {string}   method     request method (optional)
-     * @param  {object}   meta       request extra data (optional)
-     * @param  {string}   body       request body (optional)
-     * @param  {object}   headers    request headers (optional)
-     * @param  {object}   cookies    rqeuest extra cookies (optional)
-     * @param  {string}   encoding   default encoding (optional)
-     * @param  {int}      priority   request priority  (optional)
-     * @param  {boolean}   dontFilter if true, the request don't pass on the request duplicate filter (optional)
+     * @param  {string}   url               request url
+     * @param  {Function} callback          response callback
+     * @param  {object}   config            object with extra request parameters (optional)
+     * @param  {boolean}  config.base64     if true, converts the response body to base64. (optional)
+     * @param  {string}   config.method     request method (optional)
+     * @param  {object}   config.meta       request extra data (optional)
+     * @param  {string}   config.body       request body (optional)
+     * @param  {object}   config.headers    request headers (optional)
+     * @param  {object}   config.cookies    rqeuest extra cookies (optional)
+     * @param  {string}   config.encoding   default encoding (optional)
+     * @param  {int}      config.priority   request priority  (optional)
+     * @param  {boolean}  config.dont_filter if true, the request don't pass on the request duplicate filter (optional)
      *
      * @return {string}              json message written in the process stdout
      */
-    sendRequest: function(url, callback, base64, method, meta, body, headers, cookies, encoding, priority, dontFilter) {
+    sendRequest: function(url, callback, config) {
         // required fields
         _isDefined(url, 'url');
         _isDefined(callback, 'callback');
 
+        if(!config) {
+            config = {};
+        }
         // validation
         _validateType(url, 'string', 'url');
         _validateType(callback, 'function', 'callback');
-        base64 && _validateType(base64, 'boolean', 'base64');
-        method && _validateType(method, 'string', 'method');
-        meta && _validateType(meta, 'object', 'meta');
-        body && _validateType(body, 'string', 'body');
-        headers && _validateType(headers, 'object', 'headers');
-        cookies && _validateType(cookies, 'object', 'cookies');
-        encoding && _validateType(encoding, 'string', 'encoding');
-        priority && _validateType(priority, 'number', 'priority');
-        dontFilter && _validateType(dontFilter, 'boolean', 'dontFilter');
+        config.base64 && _validateType(config.base64, 'boolean', 'base64');
+        config.method && _validateType(config.method, 'string', 'method');
+        config.meta && _validateType(config.meta, 'object', 'meta');
+        config.body && _validateType(config.body, 'string', 'body');
+        config.headers && _validateType(config.headers, 'object', 'headers');
+        config.cookies && _validateType(config.cookies, 'object', 'cookies');
+        config.encoding && _validateType(config.encoding, 'string', 'encoding');
+        config.priority && _validateType(config.priority, 'number', 'priority');
+        config.dont_filter && _validateType(config.dont_filter, 'boolean', 'dont_filter');
 
         this.responseMapping[this._requestId] = callback;
 
@@ -141,15 +145,15 @@ var spider = module.exports = {
             type: 'request',
             url: url,
             id: this._requestId,
-            base64: base64 || undefined,
-            method: method || undefined,
-            meta: meta || undefined,
-            body: body || undefined,
-            headers: headers || undefined,
-            cookies: cookies || undefined,
-            encoding: encoding || undefined,
-            priority: priority || undefined,
-            dont_filter: dontFilter || undefined
+            base64: config.base64 || undefined,
+            method: config.method || undefined,
+            meta: config.meta || undefined,
+            body: config.body || undefined,
+            headers: config.headers || undefined,
+            cookies: config.cookies || undefined,
+            encoding: config.encoding || undefined,
+            priority: config.priority || undefined,
+            dont_filter: config.dont_filter || undefined
         };
 
         this._requestId++;
@@ -163,37 +167,58 @@ var spider = module.exports = {
      * @param  {string}   url        request url
      * @param  {Function} callback   response callback
      * @param  {fromResponseRequest} Creates a new request using the response
-     * @param  {boolean}  base64     if true, converts the response body to base64. (optional)
-     * @param  {string}   method     request method (optional)
-     * @param  {object}   meta       request extra data (optional)
-     * @param  {string}   body       request body (optional)
-     * @param  {object}   headers    request headers (optional)
-     * @param  {object}   cookies    rqeuest extra cookies (optional)
-     * @param  {string}   encoding   default encoding (optional)
-     * @param  {int}      priority   request priority  (optional)
-     * @param  {boolean}   dontFilter if true, the request don't pass on the request duplicate filter (optional)
+     * @param  {boolean}  fromResponseRequest.base64        if true, converts the response body to base64. (optional)
+     * @param  {string}   fromResponseRequest.method        request method (optional)
+     * @param  {object}   fromResponseRequest.meta          request extra data (optional)
+     * @param  {string}   fromResponseRequest.body          request body (optional)
+     * @param  {object}   fromResponseRequest.headers       request headers (optional)
+     * @param  {object}   fromResponseRequest.cookies       rqeuest extra cookies (optional)
+     * @param  {string}   fromResponseRequest.encoding      default encoding (optional)
+     * @param  {int}      fromResponseRequest.priority      request priority  (optional)
+     * @param  {boolean}  fromResponseRequest.dont_filter   if true, the request don't pass on the request duplicate filter (optional)
+     * @param  {string}   fromResponseRequest.formname      FormRequest.formname parameter (optional)
+     * @param  {string}   fromResponseRequest.formxpath     FormRequest.formxpath parameter (optional)
+     * @param  {string}   fromResponseRequest.formcss       FormRequest.formcss parameter (optional)
+     * @param  {string}   fromResponseRequest.formnumber    FormRequest.formnumber parameter (optional)
+     * @param  {string}   fromResponseRequest.formdata      FormRequest.formdata parameter (optional)
+     * @param  {string}   fromResponseRequest.clickdata     FormRequest.clickdata parameter (optional)
+     * @param  {string}   fromResponseRequest.dont_click    FormRequest.dont_click parameter (optional)
+     *
+     * @param  {object}   config            object with extra request parameters (optional)
+     * @param  {boolean}  config.base64     if true, converts the response body to base64. (optional)
+     * @param  {string}   config.method     request method (optional)
+     * @param  {object}   config.meta       request extra data (optional)
+     * @param  {string}   config.body       request body (optional)
+     * @param  {object}   config.headers    request headers (optional)
+     * @param  {object}   config.cookies    rqeuest extra cookies (optional)
+     * @param  {string}   config.encoding   default encoding (optional)
+     * @param  {int}      config.priority   request priority  (optional)
+     * @param  {boolean}  config.dont_filter if true, the request don't pass on the request duplicate filter (optional)
      *
      * @return {string}              json message written in the process stdout
      */
-    sendFromResponseRequest: function(url, callback, fromResponseRequest, base64, method, meta, body, headers, cookies, encoding, priority, dontFilter) {
+    sendFromResponseRequest: function(url, callback, fromResponseRequest, config) {
         // required fields
         _isDefined(url, 'url');
         _isDefined(callback, 'callback');
         _isDefined(fromResponseRequest, 'fromResponseRequest');
 
+        if (!config) {
+            config = {};
+        }
         // validation - request
         _validateType(url, 'string', 'url');
         _validateType(callback, 'function', 'callback');
         _validateType(fromResponseRequest, 'object', 'fromResponseRequest');
-        base64 && _validateType(base64, 'boolean', 'base64');
-        method && _validateType(method, 'string', 'method');
-        meta && _validateType(meta, 'object', 'meta');
-        body && _validateType(body, 'string', 'body');
-        headers && _validateType(headers, 'object', 'headers');
-        cookies && _validateType(cookies, 'object', 'cookies');
-        encoding && _validateType(encoding, 'string', 'encoding');
-        priority && _validateType(priority, 'number', 'priority');
-        dontFilter && _validateType(dontFilter, 'boolean', 'dontFilter');
+        config.base64 && _validateType(config.base64, 'boolean', 'base64');
+        config.method && _validateType(config.method, 'string', 'method');
+        config.meta && _validateType(config.meta, 'object', 'meta');
+        config.body && _validateType(config.body, 'string', 'body');
+        config.headers && _validateType(config.headers, 'object', 'headers');
+        config.cookies && _validateType(config.cookies, 'object', 'cookies');
+        config.encoding && _validateType(config.encoding, 'string', 'encoding');
+        config.priority && _validateType(config.priority, 'number', 'priority');
+        config.dont_filter && _validateType(config.dont_filter, 'boolean', 'dont_filter');
 
         // validation - fromResponseRequest
 
@@ -222,15 +247,15 @@ var spider = module.exports = {
             url: url,
             id: this._requestId,
             from_response_request: fromResponseRequest,
-            base64: base64 || undefined,
-            method: method || undefined,
-            meta: meta || undefined,
-            body: body || undefined,
-            headers: headers || undefined,
-            cookies: cookies || undefined,
-            encoding: encoding || undefined,
-            priority: priority || undefined,
-            dont_filter: dontFilter || undefined
+            base64: config.base64 || undefined,
+            method: config.method || undefined,
+            meta: config.meta || undefined,
+            body: config.body || undefined,
+            headers: config.headers || undefined,
+            cookies: config.cookies || undefined,
+            encoding: config.encoding || undefined,
+            priority: config.priority || undefined,
+            dont_filter: config.dont_filter || undefined
         };
 
         this._requestId++;

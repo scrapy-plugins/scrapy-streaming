@@ -147,68 +147,54 @@ describe('sendRequest', function() {
         assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){})});
 
         //base64
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, 1)},
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {base64: 1})},
                                                     'base64 parameter must be boolean');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, true)});
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {base64: false})});
 
         //method
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, 1)},
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {method: 1})},
                                                     'method parameter must be string');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null, 'get')});
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {method: 'get'})});
 
         //meta
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                    'text/html')}, 'meta parameter must be object');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                          null, {a: 1})});
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {meta: 1})},
+                                                                'meta parameter must be object');
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {meta: {}})});
 
         //body
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                    {a: 1}, true)}, 'body parameter must be string');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                          null, {a: 1}, 'body')});
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {body: 1})},
+                                                                'body parameter must be string');
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {body: 'body'})});
 
         //headers
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                    {a: 1}, 'body', 'Content-type')},
-                                                    'headers parameter must be object');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                          null, {a: 1}, 'body', {b: 2})});
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {headers: 'Content-type'})},
+                                                                'headers parameter must be object');
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {headers: {}})});
 
         //cookies
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, '1')},
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {cookies: 'a'})},
                                                   'cookies parameter must be object');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1})});
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {cookies: {}})});
 
         //encoding
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, {c: 1}, true)},
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {encoding: 1})},
                                                   'encoding parameter must be string');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8')});
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {encoding: 'utf8'})});
 
         //priority
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 'high')},
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {priority: 'high'})},
                                                   'priority parameter must be number');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 1)});
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {priority: 1})});
 
-        //dontFilter
-        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 1, 1)},
-                                                  'dontFilter parameter must be boolean');
-        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 1, true)});
+        //dont_filter
+        assert.throws(function(){spider.sendRequest('http://example.com', function(){}, {dont_filter: 1})},
+                                                  'dont_filter parameter must be boolean');
+        assert.doesNotThrow(function(){spider.sendRequest('http://example.com', function(){}, {dont_filter: true})});
     });
 
     it('generate the json message', function() {
-        var expected_msg = {
-            type: 'request',
-            url: 'htto://example.com',
-            id: spider._requestId,
+
+        var config = {
             base64: true,
             method: 'get',
             meta: {a: 1},
@@ -220,9 +206,23 @@ describe('sendRequest', function() {
             dont_filter: true
         };
 
-        var msg = spider.sendRequest(expected_msg.url, function(){}, expected_msg.base64,
-                expected_msg.method, expected_msg.meta, expected_msg.body, expected_msg.headers,
-                expected_msg.cookies, expected_msg.encoding, expected_msg.priority, expected_msg.dont_filter);
+        var expected_msg = {
+            type: 'request',
+            url: 'http://example.com',
+            id: spider._requestId,
+            base64: config.base64,
+            method: config.method,
+            meta: config.meta,
+            body: config.body,
+            headers: config.headers,
+            cookies: config.cookies,
+            encoding: config.encoding,
+            priority: config.priority,
+            dont_filter: config.dont_filter
+        };
+
+
+        var msg = spider.sendRequest(expected_msg.url, function(){}, config);
 
         assert.deepEqual(JSON.parse(msg), expected_msg);
     });
@@ -261,61 +261,49 @@ describe('sendFromResponseRequest', function() {
         assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {})});
 
         //base64
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, 1)},
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {base64: 1})},
                                                     'base64 parameter must be boolean');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, true)});
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {base64: false})});
 
         //method
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, 1)},
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {method: 1})},
                                                     'method parameter must be string');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, 'get')});
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {method: 'get'})});
 
         //meta
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                    'text/html')}, 'meta parameter must be object');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                          null, {a: 1})});
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {meta: 1})},
+                                                                'meta parameter must be object');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {meta: {}})});
 
         //body
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                    {a: 1}, true)}, 'body parameter must be string');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                          null, {a: 1}, 'body')});
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {body: 1})},
+                                                                'body parameter must be string');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {body: 'body'})});
 
         //headers
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                    {a: 1}, 'body', 'Content-type')},
-                                                    'headers parameter must be object');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                          null, {a: 1}, 'body', {b: 2})});
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {headers: 'Content-type'})},
+                                                                'headers parameter must be object');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {headers: {}})});
 
         //cookies
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, '1')},
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {cookies: 'a'})},
                                                   'cookies parameter must be object');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1})});
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {cookies: {}})});
 
         //encoding
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, {c: 1}, true)},
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {encoding: 1})},
                                                   'encoding parameter must be string');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8')});
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {encoding: 'utf8'})});
 
         //priority
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 'high')},
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {priority: 'high'})},
                                                   'priority parameter must be number');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 1)});
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {priority: 1})});
 
-        //dontFilter
-        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null, null,
-                                                  {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 1, 1)},
-                                                  'dontFilter parameter must be boolean');
-        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, null,
-                                                        null, {a: 1}, 'body', {b: 2}, {c: 1}, 'utf8', 1, true)});
+        //dont_filter
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {dont_filter: 1})},
+                                                  'dont_filter parameter must be boolean');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {}, {dont_filter: true})});
     });
 
     it('validate fromResponseRequest fields type', function() {
@@ -326,6 +314,18 @@ describe('sendFromResponseRequest', function() {
         //method
         assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {method: 1})},
                                                     'method parameter must be string');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {method: 'get'})});
+
+        //meta
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {meta: 1})},
+                                                                'meta parameter must be object');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {meta: {}})});
+
+        //body
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {body: 1})},
+                                                                'body parameter must be string');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {body: 'body'})});
+//url
         assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {method: 'get'})});
 
         //meta
@@ -362,10 +362,46 @@ describe('sendFromResponseRequest', function() {
         assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {dont_filter: 1})},
                                                   'dont_filter parameter must be boolean');
         assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {dont_filter: true})});
+        //headers
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {headers: 'Content-type'})},
+                                                                'headers parameter must be object');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {headers: {}})});
+
+        //cookies
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {cookies: 'a'})},
+                                                  'cookies parameter must be object');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {cookies: {}})});
+
+        //encoding
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {encoding: 1})},
+                                                  'encoding parameter must be string');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {encoding: 'utf8'})});
+
+        //priority
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {priority: 'high'})},
+                                                  'priority parameter must be number');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {priority: 1})});
+
+        //dontFilter
+        assert.throws(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {dont_filter: 1})},
+                                                  'dont_filter parameter must be boolean');
+        assert.doesNotThrow(function(){spider.sendFromResponseRequest('http://example.com', function(){}, {dont_filter: true})});
     });
 
 
     it('generate the json message', function() {
+        var config = {
+            base64: true,
+            method: 'get',
+            meta: {a: 1},
+            body: 'body',
+            headers: {b: 2},
+            cookies: {c: 3},
+            encoding: 'utf8',
+            priority: 1,
+            dont_filter: true
+        };
+
         var expected_msg = {
             type: 'from_response_request',
             url: 'http://example.com',
@@ -388,20 +424,19 @@ describe('sendFromResponseRequest', function() {
                 clickdata: {b: 2},
                 dont_click: true,
             },
-            base64: true,
-            method: 'get',
-            meta: {a: 1},
-            body: 'body',
-            headers: {b: 2},
-            cookies: {c: 3},
-            encoding: 'utf8',
-            priority: 1,
-            dont_filter: true
+            base64: config.base64,
+            method: config.method,
+            meta: config.meta,
+            body: config.body,
+            headers: config.headers,
+            cookies: config.cookies,
+            encoding: config.encoding,
+            priority: config.priority,
+            dont_filter: config.dont_filter
         };
 
-        var msg = spider.sendFromResponseRequest(expected_msg.url, function(){}, expected_msg.from_response_request,
-                expected_msg.base64, expected_msg.method, expected_msg.meta, expected_msg.body, expected_msg.headers,
-                expected_msg.cookies, expected_msg.encoding, expected_msg.priority, expected_msg.dont_filter);
+        var msg = spider.sendFromResponseRequest(expected_msg.url, function(){},
+                                                expected_msg.from_response_request, config);
 
         assert.deepEqual(JSON.parse(msg), expected_msg);
     });
