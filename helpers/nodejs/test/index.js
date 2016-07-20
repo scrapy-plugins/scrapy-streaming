@@ -209,7 +209,7 @@ describe('sendRequest', function() {
         var expected_msg = {
             type: 'request',
             url: 'http://example.com',
-            id: spider._requestId,
+            id: '' + spider._requestId,
             base64: config.base64,
             method: config.method,
             meta: config.meta,
@@ -405,7 +405,7 @@ describe('sendFromResponseRequest', function() {
         var expected_msg = {
             type: 'from_response_request',
             url: 'http://example.com',
-            id: spider._requestId,
+            id: '' + spider._requestId,
             from_response_request: {
                 url: 'http://example.com/login',
                 method: 'get',

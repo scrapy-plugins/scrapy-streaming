@@ -144,7 +144,7 @@ var spider = module.exports = {
         var msg = {
             type: 'request',
             url: url,
-            id: this._requestId,
+            id: '' + this._requestId,
             base64: config.base64 || undefined,
             method: config.method || undefined,
             meta: config.meta || undefined,
@@ -245,7 +245,7 @@ var spider = module.exports = {
         var msg = {
             type: 'from_response_request',
             url: url,
-            id: this._requestId,
+            id: '' + this._requestId,
             from_response_request: fromResponseRequest,
             base64: config.base64 || undefined,
             method: config.method || undefined,
