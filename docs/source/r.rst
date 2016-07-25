@@ -1,3 +1,5 @@
+.. _r:
+
 R Package
 =========
 .. currentmodule:: R
