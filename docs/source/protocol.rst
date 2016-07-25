@@ -13,8 +13,8 @@ the :message:`ready` message.
 
 Then, as the first message, the spider must send a :message:`spider` message with the necessary information.
 The Scrapy Streaming will start the spider execution and return the :message:`response` with ``id`` equals to ``parse``.
-Following this message, the external spider can sends any message listed bellow. To finish the spider execution, it must send the
-the :message:`close` message.
+Following this message, the external spider can sends any message listed bellow. To finish the
+spider execution, it must send the :message:`close` message.
 
 The implementation of such procedure should contain a main loop, that checks the ``type`` of the data received
 from Streaming, and then new actions can be done. It's recommended to always
@@ -58,7 +58,7 @@ This is a confirmation that communication channel is working.
 .. code-block:: python
 
     {
-        "type": "status",
+        "type": "ready",
         "status": "ready"
     }
 
@@ -78,7 +78,7 @@ urls, the request ``id`` will be ``parse``.
         "type": "response",
         "id": string,
         "url": string,
-        "headers": {},
+        "headers": object,
         "status": int,
         "body": string,
         "meta": object,
@@ -165,7 +165,7 @@ generated this error and ``details`` field, with a hint about what may be wrong 
 
 spider
 ------
-This is the firs message sent by your spider to Scrapy Streaming. It contains information about your Spider.
+This is the first message sent by your spider to Scrapy Streaming. It contains information about your Spider.
 Read the :class:`~scrapy.spiders.Spider` docs for more information.
 
 .. code-block:: python
@@ -346,8 +346,3 @@ The :message:`close` message contains only the ``type`` field, as follows:
     {
         "type": "close"
     }
-
-
-Sample Spider
--------------
-TODO

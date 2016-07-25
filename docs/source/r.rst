@@ -92,6 +92,12 @@ The ``scrapystreaming`` R package provide the following commands:
 
 .. method:: create_spider(name, start_urls, [callback, allowed_domains, custom_settings])
 
+    :param character    name:              The name of the spider
+    :param character    start_urls:        vector with initial urls
+    :param function     callback:          the function to handle the response callback from start_urls requests, must receive one parameter ``response`` that is a data.frame with the response data
+    :param character    allowed_domains:   vector with allowed domains (optional)
+    :param data.frame   custom_settings:   custom scrapy settings (optional)
+
 This command is used to create and run a Spider, sending the :message:`spider` message.
 
 Usages:
@@ -125,6 +131,9 @@ Usage:
 
 .. method:: send_log(message, level = "DEBUG")
 
+    :param character message:  the log message
+    :param character level:    log level. Must be one of 'CRITICAL', 'ERROR', 'WARNING', 'DEBUG', and 'INFO', defaults to DEBUG
+
 Send a log message to the Scrapy Streaming's logger output. This commands sends the :message:`log` message.
 
 Usages:
@@ -138,6 +147,19 @@ Usages:
     send_log("something wrong", "error")
 
 .. method:: send_request(url, callback, [base64, method, meta, body, headers, cookies, encoding, priority, dont_filter])
+
+    :param character url:           request url
+    :param function callback:       the function to handle the response callback, must receive one parameter ``response`` that is a data.frame with the response data
+    :param logical base64:          if TRUE, the response body will be encoded with base64 (optional)
+    :param character method:        request method (optional)
+    :param data.frame meta:         metadata to the request (optional)
+    :param character body:          the request body (optional)
+    :param data.frame headers:      request headers (optional)
+    :param data.frame cookies:      request cookies  (optional)
+    :param character encoding:      request encoding  (optional)
+    :param numeric priority:        request priority  (optional)
+    :param logical dont_filter:     indicates that this request should not be filtered by the scheduler (optional)
+
 
 Open a new request, using the :message:`request` message.
 
@@ -156,6 +178,30 @@ Usages:
     send_request("http://example.com/some_file.xyz", my_callback, base64 = TRUE)
 
 .. method:: send_from_response_request(url, callback, from_response_request, [base64, method, meta, body, headers, cookies, encoding, priority, dont_filter])
+
+    :param character     url:                                       request url
+    :param function      callback:                                  the function to handle the response callback, must receive one parameter ``response`` that is a data.frame with the response data
+
+    :param data.frame    from_response_request:                     data to the new request. May contain fields to the request and to the form.
+    :param character     from_response_request$method:              request method (optional)
+    :param data.frame    from_response_request$meta:                metadata to the request (optional)
+    :param character     from_response_request$body:                the request body (optional)
+    :param data.frame    from_response_request$headers:             request headers (optional)
+    :param data.frame    from_response_request$cookies:             request cookies  (optional)
+    :param character     from_response_request$encoding:            request encoding  (optional)
+    :param numeric       from_response_request$priority:            request priority  (optional)
+    :param logical       from_response_request$dont_filter:         indicates that this request should not be filtered by the scheduler (optional)
+
+    :param logical       base64:                                    if TRUE, the response body will be encoded with base64 (optional)
+    :param character     method:                                    request method (optional)
+    :param data.frame    meta:                                      metadata to the request (optional)
+    :param character     body:                                      the request body (optional)
+    :param data.frame    headers:                                   request headers (optional)
+    :param data.frame    cookies:                                   request cookies  (optional)
+    :param character     encoding:                                  request encoding  (optional)
+    :param numeric       priority:                                  request priority  (optional)
+    :param logical       dont_filter:                               indicates that this request should not be filtered by the scheduler (optional)
+
 
 This function creates a request, and then use its response to open a new request using the :message:`from_response_request` message.
 
@@ -179,6 +225,9 @@ Usages:
 
 .. method:: parse_input(raw = FALSE, ...)
 
+    :param logical raw: if TRUE, returns the raw input line. If FALSE (the default), parse it using jsonlite::fromJSON (optional)
+    :param ...:         extra arguments to jsonlite::fromJSON (optional)
+
 This method reads the ``stdin`` data.
 
 If raw is equal to TRUE, returns the string of one line received.
@@ -200,13 +249,14 @@ Usages:
 
 .. method:: handle(execute = TRUE)
 
-Read a line from ``stdin`` and processes it.
+    :param logical execute: if TRUE (the default) will execute the message as follows:
 
-if execute is TRUE (the default) will execute the message as follows:
-* ready: if the status is ready, continue the
-* response: call the callback with the message as the first parameter
-* error: stop the execution of the process and show the spider error
-* exception: stop the execution of the process and show the scrapy exception
+                            * ready: if the status is ready, continue the execution
+                            * response: call the callback with the message as the first parameter
+                            * error: stop the execution of the process and show the spider error
+                            * exception: stop the execution of the process and show the scrapy exception
+
+Read a line from ``stdin`` and processes it.
 
 if false, will return the line processed with :meth:`fromJSON`.
 
