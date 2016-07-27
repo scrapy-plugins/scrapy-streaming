@@ -8,7 +8,7 @@ setup(
     description='Develop Spiders using any Programming Language',
     author='Scrapy developers',
     packages=['scrapy_streaming'],
-    requires=['scrapy'],
+    requires=['scrapy', 'simplejson'],
 
     entry_points={
         'scrapy.commands': [
