@@ -7,10 +7,11 @@ from twisted.internet import reactor
 from twisted.internet.error import ProcessExitedAlready
 
 from scrapy_streaming.communication import CommunicationMap, LogMessage, SpiderMessage, RequestMessage, CloseMessage, \
-    FromResponseRequestMessage
+    FromResponseRequestMessage, SelectorRequestMessage
 from scrapy_streaming.communication.line_receiver import LineProcessProtocol
 from scrapy_streaming.utils import MessageError
 from scrapy_streaming.utils.spiders import StreamingSpider
+from scrapy.selector import Selector as ScrapySelector
 
 
 class StreamingProtocol(LineProcessProtocol):
@@ -82,6 +83,7 @@ class Streaming(object):
             LogMessage: self._on_log,
             SpiderMessage: self._on_spider,
             RequestMessage: self._on_request,
+            SelectorRequestMessage: self._on_selector_request,
             FromResponseRequestMessage: self._on_from_response_request,
             CloseMessage: self._on_close
         }
@@ -124,6 +126,21 @@ class Streaming(object):
         except (ValueError, TypeError) as e:  # errors raised by request creator
             self.send_exception(msg, str(e))
 
+    def _on_selector_request(self, msg):
+        # update request with id field
+        request_id = msg.data.pop('id')
+        meta = msg.data.pop('meta', {})
+        meta['request_id'] = request_id
+        msg.data['meta'] = meta
+
+        try:
+            r = Request(callback=lambda x: self.send_response_with_selector(msg, x),
+                        errback=lambda x: self.send_exception(msg, x.getErrorMessage()),
+                        **msg.data)
+            self.crawler.engine.crawl(r, self.crawler.spider)
+        except (ValueError, TypeError) as e:  # errors raised by request creator
+            self.send_exception(msg, str(e))
+
     def _on_from_response_request(self, msg):
         self._on_request(msg, self._from_response)
 
@@ -152,6 +169,26 @@ class Streaming(object):
     def send_response(self, msg, response):
         try:
             self.protocol.writeLine(CommunicationMap.response(response, msg.base64))
+        except ValueError as e:  # problems in the encoding
+            self.send_exception(msg, str(e))
+
+    def send_response_with_selector(self, msg, response):
+        try:
+            # save the extracted data
+            items = {}
+
+            # iterate over selectors
+            for name, info in msg.selector.items():
+                selector = ScrapySelector(text=response.body)
+                sel_type = info['type']
+
+                # extract the item
+                if sel_type == 'css':
+                    items[name] = selector.css(info['filter']).extract()
+                else:
+                    items[name] = selector.xpath(info['filter']).extract()
+
+            self.protocol.writeLine(CommunicationMap.response_with_selector(response, items))
         except ValueError as e:  # problems in the encoding
             self.send_exception(msg, str(e))
 

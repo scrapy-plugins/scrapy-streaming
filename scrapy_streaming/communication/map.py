@@ -16,6 +16,7 @@ class CommunicationMap(object):
     mapping = {
         'spider': validators.SpiderMessage,
         'request': validators.RequestMessage,
+        'selector_request': validators.SelectorRequestMessage,
         'from_response_request': validators.FromResponseRequestMessage,
         'log': validators.LogMessage,
         'close': validators.CloseMessage
@@ -70,6 +71,15 @@ class CommunicationMap(object):
 
         fields['id'] = resp.meta['request_id']
         fields['type'] = 'response'
+
+        return json.dumps(fields)
+
+    @staticmethod
+    def response_with_selector(resp, items):
+        fields = extract_instance_fields(resp, ['url', 'body', 'headers', 'status', 'meta', 'flags'])
+        fields['id'] = resp.meta['request_id']
+        fields['type'] = 'response_selector'
+        fields['selector'] = items
 
         return json.dumps(fields)
 

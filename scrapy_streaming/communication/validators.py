@@ -65,14 +65,44 @@ class RequestMessage(MessageValidator):
                  'cookies': (dict, list), 'encoding': six.string_types,
                  'priority': int, 'dont_filter': bool, 'base64': bool}
 
-    def __init__(self, fields):
-        default = {'id': RequiredField(), 'url': RequiredField(), 'method': EmptyField(),
-                   'meta': EmptyField(), 'body': EmptyField(), 'headers': EmptyField(),
-                   'cookies': EmptyField(), 'encoding': EmptyField(), 'priority': EmptyField(),
-                   'dont_filter': EmptyField(), 'base64': False}
+    default = {'id': RequiredField(), 'url': RequiredField(), 'method': EmptyField(),
+               'meta': EmptyField(), 'body': EmptyField(), 'headers': EmptyField(),
+               'cookies': EmptyField(), 'encoding': EmptyField(), 'priority': EmptyField(),
+               'dont_filter': EmptyField(), 'base64': False}
 
-        super(RequestMessage, self).__init__(default, fields)
+    def __init__(self, fields):
+        super(RequestMessage, self).__init__(self.default, fields)
         self.data.pop('base64', None)
+
+
+class Selector(MessageValidator):
+    validator = {'type': six.string_types, 'filter': six.string_types}
+
+    def __init__(self, selector):
+        default = {'type': RequiredField(), 'filter': RequiredField()}
+        super(Selector, self).__init__(default, selector)
+
+
+class SelectorRequestMessage(MessageValidator):
+
+    def __init__(self, fields):
+        self.validator = RequestMessage.validator.copy()
+        self.default = RequestMessage.default.copy()
+
+        # remove unused fields
+        self.validator.pop('base64')
+        self.default.pop('base64')
+        # add selector field
+        self.validator['selector'] = dict
+        self.default['selector'] = RequiredField()
+
+        super(SelectorRequestMessage, self).__init__(self.default, fields)
+
+        # validate selectors
+        for selector in fields['selector'].values():
+            s = Selector(selector)
+
+        self.data.pop('selector')
 
 
 class Form(MessageValidator):
