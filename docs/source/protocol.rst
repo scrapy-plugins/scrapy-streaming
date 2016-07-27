@@ -30,7 +30,6 @@ Scrapy Streaming Messages:
 * :message:`ready`
 * :message:`response`
 * :message:`response_selector`
-* :message:`response_item_selector`
 * :message:`exception`
 * :message:`error`
 
@@ -41,11 +40,10 @@ External Spider Messages:
 * :message:`request`
 * :message:`from_response_request`
 * :message:`selector_request`
-* :message:`item_selector_request`
 * :message:`close`
 
 .. note:: In this documentation, we use the ``*`` to identify that a field is optional.
-          When implementing your spider, you can ommit this field and you must NOT use the ``*`` character
+          When implementing your spider, you can omit this field and you must NOT use the ``*`` character
           in the field name as described here.
 
 .. message:: ready
@@ -93,32 +91,14 @@ response_selector
 This message will be sent by Streaming after receiving the response from a :message:`selector_request`.
 
 It contains the fields as described in :message:`response`, plus an additional ``selector`` field
-that is an array of strings with extracted data.
+that is a dictionary mapping from a field name to an array of extracted data.
 
 .. code-block:: python
 
     {
         "type": "response_selector",
         // ..., all response fields
-        "selector": array of strings
-    }
-
-.. message:: response_item_selector
-
-response_item_selector
-----------------------
-This message will be sent by Streaming after receiving the response from a :message:`item_selector_request`.
-
-It contains the fields as described in :message:`response`, plus an additional ``item_selector`` field
-that is an array of objects with extracted data. Each object consists of a field name (the key) and
-its extracted value (string).
-
-.. code-block:: python
-
-    {
-        "type": "response_selector",
-        // ..., all response fields
-        "item_selector": array of objects
+        "selector": object mapping field name to an array strings with extracted data
     }
 
 .. message:: exception
@@ -274,38 +254,12 @@ successful.
 
 selector_request
 ----------------
-The :message:`selector_request` can be used in order to extract data from the response. Read :ref:`topics-selectors` for more information.
-
-The :message:`selector_request` message allows you to choose between css and xpath selectors.
-It first creates a :class:`~scrapy.http.Request` and then parses the result with the desired selector.
-
-The type of this message is :message:`selector_request`, it contains all fields described in :message:`request`,
-and the ``selector`` object with the ``type`` and ``filter``. You can use it as follows:
-
-.. code-block:: python
-
-    {
-        "type": "request",
-        ... // all request's fields here
-
-        "selector": {
-            "type": "css" or "xpath",
-            "filter": string
-        }
-    }
-
-The :message:`selector_request` will return a list with the extracted data if successful.
-
-.. message:: item_selector_request
-
-item_selector_request
----------------------
-The :message:`item_selector_request` can be used in order to extract items using multiple selectors.
+The :message:`selector_request` can be used in order to extract items using multiple selectors.
 
 It first creates a :class:`~scrapy.http.Request` and then parses the result with the desired selectors.
 
-The type of this message is :message:`item_selector_request`, it contains all fields described in :message:`request`,
-and the ``item_selector`` object with the item fields and its corresponding selectors.
+The type of this message is :message:`selector_request`, it contains all fields described in :message:`request`,
+and the ``selector`` object with the item fields and its corresponding selectors.
 
 .. code-block:: python
 
@@ -313,7 +267,7 @@ and the ``item_selector`` object with the item fields and its corresponding sele
         "type": "item_selector_request",
         ... // all request's fields here
 
-        "item_selector": {
+        "selector": {
             "field 1": {
                 "type": "css" or "xpath",
                 "filter": string
@@ -327,10 +281,24 @@ and the ``item_selector`` object with the item fields and its corresponding sele
         }
     }
 
-Each key of the ``item_selector`` object is the field name, and its value is a selector.
+Each key of the ``selector`` object is the field name, and its value is a selector.
 
-The :message:`item_selector_request` will return a list with the extracted items if successful. Each item will be
-an object with its fields and extracted values.
+The :message:`selector_request` will return a list with the extracted items if successful. Each item will be
+an object with its fields and extracted values, defined as follows:
+
+.. code-block:: python
+
+    {
+        "type": "response_selector",
+        ... // all response's fields here
+
+        "selector": {
+            "field 1": ['item 1', 'item 2', ...],
+            "field 2": ['item 1', 'item 2', 'item 3', ...]
+        }
+    }
+
+
 
 .. message:: close
 
