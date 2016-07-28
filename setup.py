@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='scrapy-streaming',
@@ -7,7 +7,7 @@ setup(
     url='https://github.com/scrapy-plugins/scrapy-streaming',
     description='Develop Spiders using any Programming Language',
     author='Scrapy developers',
-    packages=['scrapy_streaming'],
+    packages=find_packages(exclude=('tests', 'tests.*')),
     requires=['scrapy'],
 
     entry_points={
