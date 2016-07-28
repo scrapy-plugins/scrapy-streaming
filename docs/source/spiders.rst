@@ -34,6 +34,10 @@ If you want to integrate external spiders with a scrapy's project, create a file
 in your project root. This file must contain an array of json objects, each object with the ``name`` ,
 ``command``, and ``args`` attributes.
 
+To use a different directory, instead of the project root, you can set the ``EXTERNAL_SPIDERS_PATH`` setting with a
+absolute directory. If the setting ``EXTERNAL_SPIDERS_PATH`` is set, Scrapy Streaming will use the spiders defined
+at ``EXTERNAL_SPIDERS_PATH/external.json``.
+
 The ``name`` attribute will be used as documented in the :attr:`Spider.name <scrapy:scrapy.spiders.Spider.name>`.
 The ``command`` is the path or name of the executable to run your spider. The ``args`` attribute is
 optional, this is an array with extra arguments to the command, if any.
