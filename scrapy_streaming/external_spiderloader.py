@@ -34,7 +34,6 @@ class ExternalSpiderLoader(object):
 
         if load_spiders:
             path = settings.get('EXTERNAL_SPIDERS_PATH', get_project_root())
-            # TODO add EXTERNAL_SPIDERS_PATH in docs
             path = os.path.abspath(path)
             self.external = os.path.join(path, 'external.json')
             self._fetch_spiders()
