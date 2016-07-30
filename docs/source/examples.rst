@@ -16,20 +16,20 @@ Examples
 3. **request_image** - This demo shows how to download binary data.
 4. **request_utf8** - Shows that Scrapy Streaming supports UTF8 encoding.
 5. **fill_form** - This example covers the :message:`from_response_request` to fill a form with some data.
+6. **post_request** - This example shows you how to do a POST request.
 
-=========  ======== === ====== ========= ======
- Example    Python   R   Java   Node.js   More
-=========  ======== === ====== ========= ======
-    1         OK     OK   OK       OK       x
-    2         OK     OK   OK       OK       x
-    3         OK     OK   OK       OK       x
-    4         OK     x    OK       OK       x
-    5         OK     OK   OK       OK       x
-=========  ======== === ====== ========= ======
+=========  ======== === ====== ========= ====== ======
+ Example    Python   R   Java   Node.js   Post   More
+=========  ======== === ====== ========= ====== ======
+    1         OK     OK   OK       OK       OK    x
+    2         OK     OK   OK       OK       OK    x
+    3         OK     OK   OK       OK       OK    x
+    4         OK     x    OK       OK       OK    x
+    5         OK     OK   OK       OK       OK    x
+=========  ======== === ====== ========= ====== ======
 
 * The Python examples are using the raw :ref:`protocol`, sending json strings in the stdout. It's recommended to
   follow theses examples if you are seeking a better understanding of the Scrapy Streaming behavior.
 * R examples are using the ``scrapystreaming`` package, you can read the documentation here: :ref:`r`.
 * Java examples are using the ``scrapystreaming`` library, you can read the documentation here: :ref:`java`
 * Node.js examples are using the ``scrapystreaming`` package, you can read the documentation here: :ref:`node`
-
