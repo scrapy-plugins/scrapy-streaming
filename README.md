@@ -9,7 +9,7 @@ Also, we officially provide helper libraries to develop your spiders using Java,
 
 ## Quickstart
 
-You can read a quick tutorial about scrapy-streaming at http://gsoc2016.readthedocs.io/en/latest/quickstart.html
+You can read a quick tutorial about scrapy-streaming at http://scrapy-streaming.readthedocs.io/en/latest/quickstart.html
 
 ## Usage
 
