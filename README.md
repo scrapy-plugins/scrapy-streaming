@@ -44,5 +44,5 @@ in this example, ``spider_name`` can be ``java_spider``, ``compiled_spider``, or
 
 ## Documentation
 
-Documentation is available online at http://gsoc2016.readthedocs.io and in the docs directory.
+Documentation is available online at http://scrapy-streaming.readthedocs.io/ and in the docs directory.
 (Temp url, this doc is from the development fork)
