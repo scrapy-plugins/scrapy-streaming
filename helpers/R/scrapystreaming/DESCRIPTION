@@ -1,0 +1,13 @@
+Package: scrapystreaming
+Title: Scrapy Streaming with R
+Version: 0.1
+Authors@R: person("Aron", "Bordin", email = "aron.bordin@gmail.com", role = c("aut", "cre"))
+Description: The Scrapy Streaming provides a helper interface to write spiders using R, using json objects to make requests, parse web contents, get data, and more.
+Depends:
+    R (>= 3.3.0),
+    jsonlite (>= 0.9.21)
+License: BSD_3_clause + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 5.0.1.9000
+Suggests: testthat
