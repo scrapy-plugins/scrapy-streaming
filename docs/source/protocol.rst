@@ -1,0 +1,316 @@
+.. _protocol:
+
+Communication Protocol
+======================
+
+The communication between the external spider and Scrapy Streaming will use json messages.
+
+Every message must be escaped and ends with a line break ``\n``. Make sure to flush the stdout after
+sending a message to avoid buffering.
+
+After starting the spider, Scrapy will let it know that the communication chanel is ready sending
+the :message:`ready` message.
+
+Then, as the first message, the spider must send a :message:`spider` message with the necessary information.
+The Scrapy Streaming will start the spider execution and return the :message:`response` with ``id`` equals to ``parse``.
+Following this message, the external spider can sends any message listed bellow. To finish the
+spider execution, it must send the :message:`close` message.
+
+The implementation of such procedure should contain a main loop, that checks the ``type`` of the data received
+from Streaming, and then new actions can be done. It's recommended to always
+check if the message if an :message:`exception` to avoid bugs in your implementation. Also, if the
+Streaming finds anything wrong with the json message sent by the spider, a
+:message:`error` message with the necessary information will be sent.
+
+.. tip:: Every message contains a field named ``type``. You can use this field to easily identify
+         the incoming data. The possible types are listed bellow.
+
+Scrapy Streaming Messages:
+
+* :message:`ready`
+* :message:`response`
+* :message:`response_selector`
+* :message:`exception`
+* :message:`error`
+
+External Spider Messages:
+
+* :message:`spider`
+* :message:`log`
+* :message:`request`
+* :message:`from_response_request`
+* :message:`selector_request`
+* :message:`close`
+
+.. note:: In this documentation, we use the ``*`` to identify that a field is optional.
+          When implementing your spider, you can omit this field and you must NOT use the ``*`` character
+          in the field name as described here.
+
+.. message:: ready
+
+ready
+-----
+This message is sent by Streaming after starting and connecting with the process stdin/stdout.
+This is a confirmation that communication channel is working.
+
+.. code-block:: python
+
+    {
+        "type": "ready",
+        "status": "ready"
+    }
+
+.. message:: response
+
+response
+--------
+Scrapy Streaming will serialize part of the :class:`~scrapy.http.Response` object.
+See :class:`~scrapy.http.Response` for more information.
+
+The response ``id`` will be the same that used in the :message:`request`. If it's the response from the initial spider
+urls, the request ``id`` will be ``parse``.
+
+.. code-block:: python
+
+    {
+        "type": "response",
+        "id": string,
+        "url": string,
+        "headers": object,
+        "status": int,
+        "body": string,
+        "meta": object,
+        "flags": array
+    }
+
+
+.. message:: response_selector
+
+response_selector
+-----------------
+This message will be sent by Streaming after receiving the response from a :message:`selector_request`.
+
+It contains the fields as described in :message:`response`, plus an additional ``selector`` field
+that is a dictionary mapping from a field name to an array of extracted data.
+
+.. code-block:: python
+
+    {
+        "type": "response_selector",
+        // ..., all response fields
+        "selector": object mapping field name to an array strings with extracted data
+    }
+
+.. message:: exception
+
+exception
+---------
+Exceptions are thrown when Scrapy faces a runtime error, such as requesting an invalid domain, being unable to
+find a form in a :message:`form_request`, etc.
+
+Each :message:`exception` contains the received message that caused this error, and the exception's message.
+
+.. code-block:: python
+
+    {
+        "type": "exception",
+        "received_message": string,
+        "exception": string
+    }
+
+
+.. message:: error
+
+error
+-----
+Errors are thrown if there is any problem with the validation of the received message. Runtime errors are thrown
+by :message:`exception`.
+
+If the Spider is using an unknown type, or an invalid field, for example, this message will be sent with the necessary information.
+
+The Streaming will send the error details, and stops its execution.
+
+The :message:`error` contains ``received_message`` field with the message received from external spider that
+generated this error and ``details`` field, with a hint about what may be wrong with the spider.
+
+.. code-block:: python
+
+    {
+        "type": "error",
+        "received_message": string,
+        "details": string
+    }
+
+.. message:: spider
+
+spider
+------
+This is the first message sent by your spider to Scrapy Streaming. It contains information about your Spider.
+Read the :class:`~scrapy.spiders.Spider` docs for more information.
+
+.. code-block:: python
+
+    {
+        "type": "spider",
+        "name": string,
+        "start_urls": array,
+        *"allowed_domains": array,
+        *"custom_settings": object
+    }
+
+
+.. message:: request
+
+log
+---
+
+Log message allows the external spider to add log messages in the scrapy streaming output.
+This may be helpful in the spider development to track variables, responses, etc.
+
+The log message is defined as follows:
+
+.. code-block:: python
+
+    {
+        "type": "log",
+        "message": string,
+        "level": string
+    }
+
+The message level must be one of the following:
+
+* ``CRITICAL`` - for critical errors (highest severity)
+* ``ERROR`` - for regular errors
+* ``WARNING`` - for warning messages
+* ``INFO`` - for informational messages
+* ``DEBUG`` - for debugging messages (lowest severity)
+
+request
+-------
+To open new requests in the running spider, use the request message. Read the :class:`~scrapy.http.Request` for more information.
+
+The :message:`request` must contains the ``id`` field. Scrapy Streaming will send the response with this same ``id``,
+so each response can be easily identified by its id.
+
+.. code-block:: python
+
+    {
+        "type": "request",
+        "id": string,
+        "url": string,
+        *"base64": bool,
+        *"method": string,
+        *"meta": object,
+        *"body": string,
+        *"headers": object,
+        *"cookies": object or array of objects,
+        *"encoding": string,
+        *"priority": int,
+        *"dont_filter": boolean
+    }
+
+If the ``base64`` parameter is ``true``, the response body will be encoded using base64.
+
+.. note:: Binary responses, such as files, images, videos, etc, must be encoded with base64.
+          Therefore, when using scrapy-streaming to download binary data, you **must** set the
+          ``base64`` parameter to ``true`` and decode the response's body with the base64 encoding.
+
+.. message:: from_response_request
+
+from_response_request
+---------------------
+The :message:`from_response_request` uses the :meth:`~scrapy.http.FormRequest.from_response` method.
+Check the :class:`~scrapy.http.FormRequest` for more information.
+
+It first creates a :class:`~scrapy.http.Request` and then use the response to create the :class:`~scrapy.http.FormRequest`
+
+The type of this message is :message:`from_response_request`, it contains all fields described in :message:`request` doc,
+and the :meth:`~scrapy.http.FormRequest.from_response` data in the ``from_response_request`` field.
+
+You can define it as follows:
+
+.. code-block:: python
+
+    {
+        "type": "from_response_request",
+
+        ... // all request's fields here
+
+        "from_response_request": {
+            *"formname": string,
+            *"formxpath": string,
+            *"formcss": string,
+            *"formnumber": int,
+            *"formdata": object,
+            *"clickdata": object,
+            *"dont_click": boolean
+        }
+    }
+
+The :message:`from_response_request` will return the response obtained from :class:`~scrapy.http.FormRequest` if
+successful.
+
+.. message:: selector_request
+
+selector_request
+----------------
+The :message:`selector_request` can be used in order to extract items using multiple selectors.
+
+It first creates a :class:`~scrapy.http.Request` and then parses the result with the desired selectors.
+
+The type of this message is :message:`selector_request`, it contains all fields described in :message:`request`,
+and the ``selector`` object with the item fields and its corresponding selectors.
+
+.. code-block:: python
+
+    {
+        "type": "item_selector_request",
+        ... // all request's fields here
+
+        "selector": {
+            "field 1": {
+                "type": "css" or "xpath",
+                "filter": string
+            },
+            "field 2": {
+                "type": "css" or "xpath",
+                "filter": string
+            }
+
+            ... // use field name: selector object
+        }
+    }
+
+Each key of the ``selector`` object is the field name, and its value is a selector.
+
+The :message:`selector_request` will return a list with the extracted items if successful. Each item will be
+an object with its fields and extracted values, defined as follows:
+
+.. code-block:: python
+
+    {
+        "type": "response_selector",
+        ... // all response's fields here
+
+        "selector": {
+            "field 1": ['item 1', 'item 2', ...],
+            "field 2": ['item 1', 'item 2', 'item 3', ...]
+        }
+    }
+
+
+
+.. message:: close
+
+close
+-----
+To finish the spider execution, send the :message:`close` message. It'll stop any pending request, close the
+communication channel, and stop the spider process.
+
+The :message:`close` message contains only the ``type`` field, as follows:
+
+.. code-block:: python
+
+    {
+        "type": "close"
+    }
