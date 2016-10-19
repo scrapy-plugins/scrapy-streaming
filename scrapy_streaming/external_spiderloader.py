@@ -1,9 +1,9 @@
-import json
+import simplejson as json
 import os
 
 from twisted.internet import reactor
 
-from scrapy_streaming.process_streaming import ProcessStreamingProtocol
+from scrapy_streaming.streaming import StreamingProtocol
 from scrapy_streaming.utils import get_project_root
 
 
@@ -34,7 +34,6 @@ class ExternalSpiderLoader(object):
 
         if load_spiders:
             path = settings.get('EXTERNAL_SPIDERS_PATH', get_project_root())
-            # TODO add EXTERNAL_SPIDERS_PATH in docs
             path = os.path.abspath(path)
             self.external = os.path.join(path, 'external.json')
             self._fetch_spiders()
@@ -68,7 +67,7 @@ class ExternalSpiderLoader(object):
         if not isinstance(name_or_spider, ExternalSpider):
             name_or_spider = self._spiders[name_or_spider]
 
-        protocol = ProcessStreamingProtocol()
+        protocol = StreamingProtocol()
         reactor.spawnProcess(protocol, name_or_spider.command, args=[name_or_spider.command] + name_or_spider.args)
         reactor.run()
 
