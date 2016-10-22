@@ -1,14 +1,19 @@
 language: python
 python: 3.5
-sudo: false
+
 env:
- - TOXENV=py27
- - TOXENV=py35
+    - TOXENV=py27
+    - TOXENV=py35
 install:
- - pip install -U tox twine wheel codecov
-script: tox
+    - pip install -U tox twine wheel codecov;
+    - sudo apt-get update;
+    - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -;
+    - sudo apt-get install -y nodejs;
+script:
+    - make test
 after_success:
-  - codecov
+    - codecov
+    - make lint
 cache:
-  directories:
-    - $HOME/.cache/pip
+    directories:
+        - $HOME/.cache/pip
